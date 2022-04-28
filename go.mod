@@ -1,4 +1,4 @@
-module okp4/template-go
+module okp4/cosmos-faucet
 
 go 1.18
 

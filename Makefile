@@ -1,7 +1,7 @@
 # ℹ Freely based on: https://gist.github.com/thomaspoignant/5b72d579bd5f311904d973652180c705
 
 # Constants
-BINARY_NAME             = template-go
+BINARY_NAME             = cosmos-faucet
 TARGET_FOLDER           = target
 DIST_FOLDER             = $(TARGET_FOLDER)/dist
 DOCKER_IMAGE_GOLANG_CI  = golangci/golangci-lint:v1.45.2
@@ -17,9 +17,9 @@ COLOR_RESET  = $(shell tput -Txterm sgr0)
 VERSION  := $(shell cat version)
 COMMIT   := $(shell git log -1 --format='%H')
 LD_FLAGS  = \
-	-X okp4/template-go/internal/version.Name=$(BINARY_NAME) \
-	-X okp4/template-go/internal/version.Version=$(VERSION)  \
-	-X okp4/template-go/internal/version.Commit=$(COMMIT)
+	-X okp4/cosmos-faucet/internal/version.Name=$(BINARY_NAME) \
+	-X okp4/cosmos-faucet/internal/version.Version=$(VERSION)  \
+	-X okp4/cosmos-faucet/internal/version.Commit=$(COMMIT)
 BUILD_FLAGS := -ldflags '$(LD_FLAGS)'
 
 # Commands
