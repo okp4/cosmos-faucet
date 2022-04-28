@@ -1,0 +1,42 @@
+branches:
+  - main
+
+plugins:
+  - "@semantic-release/commit-analyzer"
+  - "@semantic-release/release-notes-generator"
+  - - "@semantic-release/changelog"
+    - changelogFile: CHANGELOG.md
+      changelogTitle: "# ØKP4 template-go"
+  - - "@google/semantic-release-replace-plugin"
+    - replacements:
+        - files: [version]
+          from: ^.+$
+          to: ${nextRelease.version}
+          countMatches: true
+          results:
+            - file: version
+              hasChanged: true
+              numMatches: 1
+              numReplacements: 1
+  - - "@semantic-release/exec"
+    - prepareCmd: |
+        make build-go-all
+  - - "@semantic-release/github"
+    - assets:
+        - name: template-go_darwin_amd64
+          label: Binary - Darwin amd64
+          path: "./target/dist/darwin/amd64/template-go"
+        - name: template-go_darwin_arm64
+          label: Binary - Darwin arm64
+          path: "./target/dist/darwin/arm64/template-go"
+        - name: template-go_linux_amd64
+          label: Binary - Linux amd64
+          path: "./target/dist/linux/amd64/template-go"
+        - name: template-go_windows_amd64.exe
+          label: Binary - Windows amd64
+          path: "./target/dist/windows/amd64/template-go.exe"
+  - - "@semantic-release/git"
+    - assets:
+        - CHANGELOG.md
+        - version
+      message: "chore(release): perform release ${nextRelease.version}"
