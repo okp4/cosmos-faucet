@@ -8,9 +8,9 @@ import (
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
-	Use:   "template-go",
-	Short: "A template fo Golang projects",
-	Long:  "A template fo Golang projects",
+	Use:   "cosmos-faucet",
+	Short: "A CØSMOS Faucet",
+	Long:  "CØSMOS Faucet",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

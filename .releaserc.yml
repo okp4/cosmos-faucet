@@ -6,7 +6,7 @@ plugins:
   - "@semantic-release/release-notes-generator"
   - - "@semantic-release/changelog"
     - changelogFile: CHANGELOG.md
-      changelogTitle: "# ØKP4 template-go"
+      changelogTitle: "# CØSMOS Faucet"
   - - "@google/semantic-release-replace-plugin"
     - replacements:
         - files: [version]
@@ -23,18 +23,18 @@ plugins:
         make build-go-all
   - - "@semantic-release/github"
     - assets:
-        - name: template-go_darwin_amd64
+        - name: cosmos-faucet_darwin_amd64
           label: Binary - Darwin amd64
-          path: "./target/dist/darwin/amd64/template-go"
-        - name: template-go_darwin_arm64
+          path: "./target/dist/darwin/amd64/cosmos-faucet"
+        - name: cosmos-faucet_darwin_arm64
           label: Binary - Darwin arm64
-          path: "./target/dist/darwin/arm64/template-go"
-        - name: template-go_linux_amd64
+          path: "./target/dist/darwin/arm64/cosmos-faucet"
+        - name: cosmos-faucet_linux_amd64
           label: Binary - Linux amd64
-          path: "./target/dist/linux/amd64/template-go"
-        - name: template-go_windows_amd64.exe
+          path: "./target/dist/linux/amd64/cosmos-faucet"
+        - name: cosmos-faucet_windows_amd64.exe
           label: Binary - Windows amd64
-          path: "./target/dist/windows/amd64/template-go.exe"
+          path: "./target/dist/windows/amd64/cosmos-faucet.exe"
   - - "@semantic-release/git"
     - assets:
         - CHANGELOG.md

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
-	"okp4/template-go/internal/version"
+	"okp4/cosmos-faucet/internal/version"
 	"strings"
 
 	"github.com/spf13/cobra"
