@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"okp4/cosmos-faucet/pkg/send"
 	"okp4/cosmos-faucet/util"
 )
 
@@ -25,7 +26,7 @@ func NewSendCommand() *cobra.Command {
 			return initializeConfig(cmd)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return send.SendTx(config, args[0])
 		},
 	}
 
@@ -38,7 +39,7 @@ func NewSendCommand() *cobra.Command {
 	sendCmd.Flags().Int64Var(&config.FeeAmount, "fee-amount", 1000, "Fee amount") // TODO: Determine the default value
 	sendCmd.Flags().Int64Var(&config.AmountSend, "amount-send", 1, "Amount send value")
 	sendCmd.Flags().StringVar(&config.Memo, "memo", "Sent by økp4 faucet", "The memo description")
-	sendCmd.Flags().Int64Var(&config.GasLimit, "gas-limit", 200000, "Gas limit")
+	sendCmd.Flags().Uint64Var(&config.GasLimit, "gas-limit", 200000, "Gas limit")
 
 	return sendCmd
 }

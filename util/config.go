@@ -10,5 +10,5 @@ type Config struct {
 	FeeAmount  int64  `mapstructure:"fee-amount"`
 	AmountSend int64  `mapstructure:"amount-send"`
 	Memo       string `mapstructure:"memo"`
-	GasLimit   int64  `mapstructure:"gas-limit"`
+	GasLimit   uint64 `mapstructure:"gas-limit"`
 }
