@@ -32,8 +32,7 @@ func NewSendCommand() *cobra.Command {
 
 	sendCmd.Flags().StringVar(&config.Mnemonic, "mnemonic", "", "")
 	sendCmd.Flags().StringVar(&config.ChainId, "chain-id", "okp4", "The network chain ID")
-	sendCmd.Flags().StringVar(&config.Url, "url", "127.0.0.1", "The grpc server url")
-	sendCmd.Flags().IntVar(&config.Port, "port", 9090, "The grpc server port")
+	sendCmd.Flags().StringVar(&config.GrpcAddress, "grpcAddress", "127.0.0.1:9090", "The grpc okp4 server url")
 	sendCmd.Flags().StringVar(&config.Denom, "denom", "know", "Token denom")
 	sendCmd.Flags().StringVar(&config.Prefix, "prefix", "okp4", "Address prefix")
 	sendCmd.Flags().Int64Var(&config.FeeAmount, "fee-amount", 1000, "Fee amount") // TODO: Determine the default value
