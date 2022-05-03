@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	"okp4/cosmos-faucet/pkg/client"
@@ -10,12 +11,12 @@ import (
 )
 
 // NewSendRequestHandlerFn returns an HTTP REST handler for make transaction to a given address.
-func NewSendRequestHandlerFn(faucet *client.Faucet) http.HandlerFunc {
+func NewSendRequestHandlerFn(ctx context.Context, faucet *client.Faucet) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		bech32Addr := vars["address"]
 
-		err := faucet.SendTxMsg(bech32Addr)
+		err := faucet.SendTxMsg(ctx, bech32Addr)
 		if rest.CheckBadRequestError(w, err) {
 			return
 		}

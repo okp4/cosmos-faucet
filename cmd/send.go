@@ -24,7 +24,7 @@ func NewSendCommand() *cobra.Command {
 				_ = faucet.Close()
 			}(faucet)
 
-			return faucet.SendTxMsg(args[0])
+			return faucet.SendTxMsg(context.Background(), args[0])
 		},
 	}
 

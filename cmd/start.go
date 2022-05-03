@@ -35,7 +35,7 @@ func NewStartCommand() *cobra.Command {
 			router := mux.NewRouter().StrictSlash(true)
 			router.Path("/").
 				Queries("address", "{address}").
-				HandlerFunc(server.NewSendRequestHandlerFn(faucet)).
+				HandlerFunc(server.NewSendRequestHandlerFn(context.Background(), faucet)).
 				Methods("GET")
 
 			return http.ListenAndServe(addr, router)

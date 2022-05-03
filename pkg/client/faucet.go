@@ -16,7 +16,6 @@ import (
 )
 
 type Faucet struct {
-	Context     context.Context
 	Config      pkg.Config
 	GRPCConn    *grpc.ClientConn
 	FromAddr    types.AccAddress
@@ -49,7 +48,6 @@ func NewFaucet(ctx context.Context, config pkg.Config) (*Faucet, error) {
 	}
 
 	return &Faucet{
-		Context:     ctx,
 		Config:      config,
 		GRPCConn:    grpcConn,
 		FromAddr:    fromAddr,
@@ -59,7 +57,7 @@ func NewFaucet(ctx context.Context, config pkg.Config) (*Faucet, error) {
 	}, nil
 }
 
-func (f *Faucet) SendTxMsg(addr string) error {
+func (f *Faucet) SendTxMsg(ctx context.Context, addr string) error {
 	toAddr, err := types.GetFromBech32(addr, f.Config.Prefix)
 	if err != nil {
 		return err
@@ -80,7 +78,7 @@ func (f *Faucet) SendTxMsg(addr string) error {
 		return err
 	}
 
-	return cosmos.BroadcastTx(f.Context, f.GRPCConn, txBytes)
+	return cosmos.BroadcastTx(ctx, f.GRPCConn, txBytes)
 }
 
 func (f *Faucet) Close() error {
