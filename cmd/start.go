@@ -23,7 +23,6 @@ func NewStartCommand() *cobra.Command {
 		Use:   "start",
 		Short: "Start the REST api",
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			faucet, err := client.NewFaucet(context.Background(), config)
 			if err != nil {
 				return err

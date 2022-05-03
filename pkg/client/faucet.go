@@ -41,8 +41,12 @@ func NewFaucet(ctx context.Context, config pkg.Config) (*Faucet, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	fromAddr := types.AccAddress(fromPrivKey.PubKey().Address())
 	account, err := cosmos.GetAccount(ctx, grpcConn, fromAddr.String())
+	if err != nil {
+		return nil, err
+	}
 
 	return &Faucet{
 		Context:     ctx,
