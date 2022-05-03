@@ -7,6 +7,9 @@ import (
 
 	"okp4/cosmos-faucet/util"
 
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/simapp/params"
+
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	crypto "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -60,6 +63,46 @@ func Send(config util.Config, address string) error {
 		return err
 	}
 
+	err = Sign(config, encCfg, fromPrivKey, account, txBuilder)
+	if err != nil {
+		return err
+	}
+
+	txBytes, err := encCfg.TxConfig.TxEncoder()(txBuilder.GetTx())
+	if err != nil {
+		return err
+	}
+
+	txJSONBytes, err := encCfg.TxConfig.TxJSONEncoder()(txBuilder.GetTx())
+	if err != nil {
+		return err
+	}
+	txJSON := string(txJSONBytes)
+	fmt.Println(txJSON)
+
+	txClient := tx.NewServiceClient(grpcConn)
+	grpcRes, err := txClient.BroadcastTx(
+		context.Background(),
+		&tx.BroadcastTxRequest{
+			Mode:    tx.BroadcastMode_BROADCAST_MODE_SYNC,
+			TxBytes: txBytes,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if grpcRes.TxResponse.Code != 0 {
+		return errors.New(grpcRes.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+func Sign(
+	config util.Config, encCfg params.EncodingConfig, fromPrivKey crypto.PrivKey,
+	account *auth.BaseAccount, txBuilder client.TxBuilder) error {
+
 	signMode := encCfg.TxConfig.SignModeHandler().DefaultMode()
 
 	pubKey := fromPrivKey.PubKey()
@@ -110,34 +153,6 @@ func Send(config util.Config, address string) error {
 	prevSignatures = append(prevSignatures, sig)
 	if err := txBuilder.SetSignatures(prevSignatures...); err != nil {
 		return err
-	}
-
-	txBytes, err := encCfg.TxConfig.TxEncoder()(txBuilder.GetTx())
-	if err != nil {
-		return err
-	}
-
-	txJSONBytes, err := encCfg.TxConfig.TxJSONEncoder()(txBuilder.GetTx())
-	if err != nil {
-		return err
-	}
-	txJSON := string(txJSONBytes)
-	fmt.Println(txJSON)
-
-	txClient := tx.NewServiceClient(grpcConn)
-	grpcRes, err := txClient.BroadcastTx(
-		context.Background(),
-		&tx.BroadcastTxRequest{
-			Mode:    tx.BroadcastMode_BROADCAST_MODE_SYNC,
-			TxBytes: txBytes,
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	if grpcRes.TxResponse.Code != 0 {
-		return errors.New(grpcRes.TxResponse.RawLog)
 	}
 
 	return nil
