@@ -52,10 +52,13 @@ func Send(config util.Config, address string) error {
 	txBuilder.SetMemo(config.Memo)
 	txBuilder.SetFeeAmount(types.NewCoins(types.NewInt64Coin(config.Denom, config.FeeAmount)))
 
-	grpcConn, _ := grpc.Dial(
+	grpcConn, err := grpc.Dial(
 		config.GrpcAddress,
 		grpc.WithInsecure(),
 	)
+	if err != nil {
+		return err
+	}
 	defer grpcConn.Close()
 
 	account, err := GetAccount(grpcConn, fromAddr.String())
