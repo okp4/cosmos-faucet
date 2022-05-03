@@ -33,11 +33,11 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	rootCmd.PersistentFlags().StringVar(&config.Mnemonic, FlagMnemonic, "", "")
-	rootCmd.PersistentFlags().StringVar(&config.ChainID, FlagChainID, "okp4", "The network chain ID")
+	rootCmd.PersistentFlags().StringVar(&config.ChainID, FlagChainID, "localnet-okp4-1", "The network chain ID")
 	rootCmd.PersistentFlags().StringVar(&config.GrpcAddress, FlagGrpcAddress, "127.0.0.1:9090", "The grpc okp4 server url")
 	rootCmd.PersistentFlags().StringVar(&config.Denom, FlagDenom, "know", "Token denom")
 	rootCmd.PersistentFlags().StringVar(&config.Prefix, FlagPrefix, "okp4", "Address prefix")
-	rootCmd.PersistentFlags().Int64Var(&config.FeeAmount, FlagFeeAmount, 1000, "Fee amount") // TODO: Determine the default value
+	rootCmd.PersistentFlags().Int64Var(&config.FeeAmount, FlagFeeAmount, 0, "Fee amount")
 	rootCmd.PersistentFlags().Int64Var(&config.AmountSend, FlagAmountSend, 1, "Amount send value")
 	rootCmd.PersistentFlags().StringVar(&config.Memo, FlagMemo, "Sent by økp4 faucet", "The memo description")
 	rootCmd.PersistentFlags().Uint64Var(&config.GasLimit, FlagGasLimit, 200000, "Gas limit")
