@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"context"
 	"net/http"
 
-	"okp4/cosmos-faucet/rest"
+	"okp4/cosmos-faucet/pkg/client"
+	"okp4/cosmos-faucet/pkg/server"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
@@ -21,8 +23,18 @@ func NewStartCommand() *cobra.Command {
 		Use:   "start",
 		Short: "Start the REST api",
 		RunE: func(cmd *cobra.Command, args []string) error {
+
+			faucet, err := client.NewFaucet(context.Background(), config)
+			if err != nil {
+				return err
+			}
+
+			defer func(faucet *client.Faucet) {
+				_ = faucet.Close()
+			}(faucet)
+
 			router := mux.NewRouter().StrictSlash(true)
-			router.HandleFunc("/send/{address}", rest.NewSendRequestHandlerFn(config)).Methods("GET")
+			router.HandleFunc("/send/{address}", server.NewSendRequestHandlerFn(faucet)).Methods("GET")
 
 			return http.ListenAndServe(addr, router)
 		},

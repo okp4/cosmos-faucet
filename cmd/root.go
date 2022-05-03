@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"okp4/cosmos-faucet/util"
+	"okp4/cosmos-faucet/pkg"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -16,7 +16,7 @@ const (
 	envPrefix             = "FAUCET"
 )
 
-var config util.Config
+var config pkg.Config
 
 // NewRootCommand returns the root CLI command with persistent flag handling.
 var rootCmd = &cobra.Command{

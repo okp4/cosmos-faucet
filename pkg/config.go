@@ -1,4 +1,4 @@
-package util
+package pkg
 
 type Config struct {
 	GrpcAddress string `mapstructure:"grpc-address"`
