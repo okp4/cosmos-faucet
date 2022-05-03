@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"okp4/cosmos-faucet/util"
+
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	crypto "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -15,10 +18,9 @@ import (
 	auth "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"google.golang.org/grpc"
-	"okp4/cosmos-faucet/util"
 )
 
-func SendTx(config util.Config, address string) error {
+func Send(config util.Config, address string) error {
 	conf := types.GetConfig()
 	conf.SetBech32PrefixForAccount(config.Prefix, config.Prefix)
 
@@ -62,7 +64,7 @@ func SendTx(config util.Config, address string) error {
 
 	pubKey := fromPrivKey.PubKey()
 	signerData := authsigning.SignerData{
-		ChainID:       config.ChainId,
+		ChainID:       config.ChainID,
 		AccountNumber: account.GetAccountNumber(),
 		Sequence:      account.GetSequence(),
 	}
