@@ -51,7 +51,6 @@ func SignTx(
 		Data:     &sigData,
 		Sequence: account.Sequence,
 	}
-	var prevSignatures []signing.SignatureV2
 
 	if err := txBuilder.SetSignatures(sig); err != nil {
 		return err
@@ -80,8 +79,7 @@ func SignTx(
 		Sequence: account.Sequence,
 	}
 
-	prevSignatures = append(prevSignatures, sig)
-	if err := txBuilder.SetSignatures(prevSignatures...); err != nil {
+	if err := txBuilder.SetSignatures(sig); err != nil {
 		return err
 	}
 
