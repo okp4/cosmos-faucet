@@ -41,6 +41,11 @@ func Execute() {
 	rootCmd.PersistentFlags().Int64Var(&config.AmountSend, FlagAmountSend, 1, "Amount send value")
 	rootCmd.PersistentFlags().StringVar(&config.Memo, FlagMemo, "Sent by økp4 faucet", "The memo description")
 	rootCmd.PersistentFlags().Uint64Var(&config.GasLimit, FlagGasLimit, 200000, "Gas limit")
+	rootCmd.PersistentFlags().BoolVar(&config.NoTLS, FlagNoTLS, false, "No encryption with the GRPC endpoint")
+	rootCmd.PersistentFlags().BoolVar(&config.TLSSkipVerify,
+		FlagTLSSkipVerify,
+		false,
+		"Encryption with the GRPC endpoint but skip certificates verification")
 
 	err := rootCmd.Execute()
 	if err != nil {

@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"crypto/tls"
 
 	"okp4/cosmos-faucet/pkg"
 	"okp4/cosmos-faucet/pkg/cosmos"
@@ -12,6 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -28,9 +30,19 @@ func NewFaucet(ctx context.Context, config pkg.Config) (*Faucet, error) {
 	conf := types.GetConfig()
 	conf.SetBech32PrefixForAccount(config.Prefix, config.Prefix)
 
+	var opts credentials.TransportCredentials
+	switch {
+	case config.NoTLS:
+		opts = insecure.NewCredentials()
+	case config.TLSSkipVerify:
+		credentials.NewTLS(&tls.Config{InsecureSkipVerify: true}) // #nosec G402 : skip lint since it's an optional flag
+	default:
+		credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})
+	}
+
 	grpcConn, err := grpc.Dial(
 		config.GrpcAddress,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithTransportCredentials(opts),
 	)
 	if err != nil {
 		return nil, err

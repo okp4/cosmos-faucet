@@ -17,8 +17,7 @@ func GetAccount(context context.Context, grpcConn *grpc.ClientConn, address stri
 	}
 
 	var account auth.BaseAccount
-	err = account.Unmarshal(query.GetAccount().Value)
-	if err != nil {
+	if err := account.Unmarshal(query.GetAccount().Value); err != nil {
 		return nil, err
 	}
 
