@@ -17,8 +17,6 @@ func NewSendRequestHandlerFn(ctx context.Context, faucet *client.Faucet) http.Ha
 		bech32Addr := vars["address"]
 
 		err := faucet.SendTxMsg(ctx, bech32Addr)
-		if rest.CheckBadRequestError(w, err) {
-			return
-		}
+		rest.CheckBadRequestError(w, err)
 	}
 }
