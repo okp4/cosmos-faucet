@@ -7,6 +7,7 @@ import (
 )
 
 func (s httpServer) createRoutes(faucet *client.Faucet) {
+	s.router.Use(prometheusMiddleware)
 	s.router.Path("/").
 		Queries("address", "{address}").
 		HandlerFunc(NewSendRequestHandlerFn(context.Background(), faucet)).
@@ -15,6 +16,6 @@ func (s httpServer) createRoutes(faucet *client.Faucet) {
 		HandlerFunc(NewHealthRequestHandlerFunc()).
 		Methods("GET")
 	s.router.Path("/metrics").
-		HandlerFunc(NewMetricsRequestHandlerFunc(context.Background(), faucet)).
+		HandlerFunc(NewMetricsRequestHandlerFunc()).
 		Methods("GET")
 }
