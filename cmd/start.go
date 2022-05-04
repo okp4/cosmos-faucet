@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"github.com/rs/zerolog/log"
 	"okp4/cosmos-faucet/pkg/client"
 	"okp4/cosmos-faucet/pkg/server"
 
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
