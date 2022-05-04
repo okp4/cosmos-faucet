@@ -1,12 +1,7 @@
 package cmd
 
 import (
-<<<<<<< HEAD
-	"net/http"
-
-=======
 	"github.com/rs/zerolog/log"
->>>>>>> ce45dce (feat: move server related code to server package)
 	"okp4/cosmos-faucet/pkg/client"
 	"okp4/cosmos-faucet/pkg/server"
 

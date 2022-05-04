@@ -39,7 +39,7 @@ var totalRequests = prometheus.NewCounterVec(
 
 var responseStatus = prometheus.NewCounterVec(
 	prometheus.CounterOpts{
-		Name: "response_status",
+		Name: "response_status_total",
 		Help: "Status of HTTP response",
 	},
 	[]string{"status"},
@@ -73,7 +73,6 @@ func prometheusMiddleware(handler http.Handler) http.Handler {
 	})
 }
 
-// NewMetricsRequestHandler returns a REST handler returning useful prometheus metrics
-func NewMetricsRequestHandler() http.Handler {
+func newMetricsRequestHandler() http.Handler {
 	return promhttp.Handler()
 }
