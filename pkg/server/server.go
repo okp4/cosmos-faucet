@@ -20,10 +20,11 @@ type httpServer struct {
 
 // NewServer creates a new httpServer containing router
 func NewServer(faucet *client.Faucet) HttpServer {
-	server := httpServer{
+	server := &httpServer{
 		router: mux.NewRouter().StrictSlash(true),
 	}
 	server.createRoutes(faucet)
+	initPrometheus()
 	return server
 }
 
