@@ -6,7 +6,7 @@ import (
 	"okp4/cosmos-faucet/pkg/client"
 )
 
-func (s HttpServer) createRoutes(faucet *client.Faucet) {
+func (s httpServer) createRoutes(faucet *client.Faucet) {
 	s.router.Path("/").
 		Queries("address", "{address}").
 		HandlerFunc(NewSendRequestHandlerFn(context.Background(), faucet)).

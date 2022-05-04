@@ -9,13 +9,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type HttpServer struct {
+// HttpServer exposes server methods
+type HttpServer interface {
+	Start(string)
+}
+
+type httpServer struct {
 	router *mux.Router
 }
 
 // NewServer creates a new httpServer containing router
 func NewServer(faucet *client.Faucet) HttpServer {
-	server := HttpServer{
+	server := httpServer{
 		router: mux.NewRouter().StrictSlash(true),
 	}
 	server.createRoutes(faucet)
@@ -23,7 +28,7 @@ func NewServer(faucet *client.Faucet) HttpServer {
 }
 
 // Start starts the http server on specified address
-func (s HttpServer) Start(address string) {
+func (s httpServer) Start(address string) {
 	log.Info().Msgf("Server listening at %s", address)
 	log.Fatal().Err(http.ListenAndServe(address, s.router)).Msg("Server listening stopped")
 }
