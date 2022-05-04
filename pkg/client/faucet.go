@@ -22,11 +22,10 @@ type Faucet struct {
 	GRPCConn    *grpc.ClientConn
 	FromAddr    types.AccAddress
 	FromPrivKey crypto.PrivKey
-	SignerData  signing.SignerData
 	TxConfig    client.TxConfig
 }
 
-func NewFaucet(ctx context.Context, config pkg.Config) (*Faucet, error) {
+func NewFaucet(config pkg.Config) (*Faucet, error) {
 	conf := types.GetConfig()
 	conf.SetBech32PrefixForAccount(config.Prefix, config.Prefix)
 
@@ -54,23 +53,12 @@ func NewFaucet(ctx context.Context, config pkg.Config) (*Faucet, error) {
 	}
 
 	fromAddr := types.AccAddress(fromPrivKey.PubKey().Address())
-	account, err := cosmos.GetAccount(ctx, grpcConn, fromAddr.String())
-	if err != nil {
-		return nil, err
-	}
-
-	signerData := signing.SignerData{
-		ChainID:       config.ChainID,
-		AccountNumber: account.GetAccountNumber(),
-		Sequence:      account.GetSequence(),
-	}
 
 	return &Faucet{
 		Config:      config,
 		GRPCConn:    grpcConn,
 		FromAddr:    fromAddr,
 		FromPrivKey: fromPrivKey,
-		SignerData:  signerData,
 		TxConfig:    simapp.MakeTestEncodingConfig().TxConfig,
 	}, nil
 }
@@ -86,7 +74,18 @@ func (f *Faucet) SendTxMsg(ctx context.Context, addr string) error {
 		return err
 	}
 
-	err = cosmos.SignTx(f.FromPrivKey, f.SignerData, f.TxConfig, txBuilder)
+	account, err := cosmos.GetAccount(ctx, f.GRPCConn, f.FromAddr.String())
+	if err != nil {
+		return err
+	}
+
+	signerData := signing.SignerData{
+		ChainID:       f.Config.ChainID,
+		AccountNumber: account.GetAccountNumber(),
+		Sequence:      account.GetSequence(),
+	}
+
+	err = cosmos.SignTx(f.FromPrivKey, signerData, f.TxConfig, txBuilder)
 	if err != nil {
 		return err
 	}

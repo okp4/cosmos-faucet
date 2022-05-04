@@ -15,7 +15,7 @@ func NewSendCommand() *cobra.Command {
 		Short: "Send tokens to a given address",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			faucet, err := client.NewFaucet(context.Background(), config)
+			faucet, err := client.NewFaucet(config)
 			if err != nil {
 				return err
 			}
