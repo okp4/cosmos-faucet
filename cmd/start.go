@@ -8,6 +8,7 @@ import (
 	"okp4/cosmos-faucet/pkg/server"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -22,14 +23,15 @@ func NewStartCommand() *cobra.Command {
 	startCmd := &cobra.Command{
 		Use:   "start",
 		Short: "Start the REST api",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: func(cmd *cobra.Command, args []string) {
 			faucet, err := client.NewFaucet(config)
 			if err != nil {
-				return err
+				log.Fatal().Err(err).Msg("Failed create a new faucet instance")
 			}
 
 			defer func(faucet *client.Faucet) {
 				_ = faucet.Close()
+				log.Info().Msg("Server stopped")
 			}(faucet)
 
 			router := mux.NewRouter().StrictSlash(true)
@@ -38,7 +40,8 @@ func NewStartCommand() *cobra.Command {
 				HandlerFunc(server.NewSendRequestHandlerFn(context.Background(), faucet)).
 				Methods("GET")
 
-			return http.ListenAndServe(addr, router)
+			log.Info().Msgf("Server listening at %s", addr)
+			log.Fatal().Err(http.ListenAndServe(addr, router)).Msg("Server listening stopped")
 		},
 	}
 

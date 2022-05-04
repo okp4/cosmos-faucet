@@ -7,6 +7,8 @@ import (
 
 	"okp4/cosmos-faucet/pkg"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -25,6 +27,7 @@ var rootCmd = &cobra.Command{
 	Short: "A CØSMOS Faucet",
 	Long:  "CØSMOS Faucet",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: cmd.OutOrStdout()})
 		return ReadPersistentFlags(cmd)
 	},
 }
