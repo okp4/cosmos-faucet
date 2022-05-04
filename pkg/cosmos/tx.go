@@ -10,7 +10,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	auth "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
@@ -31,17 +30,11 @@ func BuildUnsignedTx(config pkg.Config, txConfig sdk.TxConfig, fromAddr, toAddr 
 }
 
 func SignTx(
-	config pkg.Config, fromPrivKey crypto.PrivKey,
-	account *auth.BaseAccount, txConfig sdk.TxConfig, txBuilder sdk.TxBuilder) error {
+	fromPrivKey crypto.PrivKey, signerData authsigning.SignerData,
+	txConfig sdk.TxConfig, txBuilder sdk.TxBuilder) error {
 	signMode := txConfig.SignModeHandler().DefaultMode()
 
 	pubKey := fromPrivKey.PubKey()
-	signerData := authsigning.SignerData{
-		ChainID:       config.ChainID,
-		AccountNumber: account.GetAccountNumber(),
-		Sequence:      account.GetSequence(),
-	}
-
 	sigData := signing.SingleSignatureData{
 		SignMode:  signMode,
 		Signature: nil,
@@ -49,7 +42,7 @@ func SignTx(
 	sig := signing.SignatureV2{
 		PubKey:   pubKey,
 		Data:     &sigData,
-		Sequence: account.Sequence,
+		Sequence: signerData.Sequence,
 	}
 
 	if err := txBuilder.SetSignatures(sig); err != nil {
@@ -76,7 +69,7 @@ func SignTx(
 	sig = signing.SignatureV2{
 		PubKey:   pubKey,
 		Data:     &sigData,
-		Sequence: account.Sequence,
+		Sequence: signerData.Sequence,
 	}
 
 	if err := txBuilder.SetSignatures(sig); err != nil {

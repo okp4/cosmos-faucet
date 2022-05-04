@@ -10,7 +10,7 @@ import (
 	crypto "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/cosmos/cosmos-sdk/types"
-	auth "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -20,7 +20,7 @@ type Faucet struct {
 	GRPCConn    *grpc.ClientConn
 	FromAddr    types.AccAddress
 	FromPrivKey crypto.PrivKey
-	Account     *auth.BaseAccount
+	SignerData  signing.SignerData
 	TxConfig    client.TxConfig
 }
 
@@ -47,12 +47,18 @@ func NewFaucet(ctx context.Context, config pkg.Config) (*Faucet, error) {
 		return nil, err
 	}
 
+	signerData := signing.SignerData{
+		ChainID:       config.ChainID,
+		AccountNumber: account.GetAccountNumber(),
+		Sequence:      account.GetSequence(),
+	}
+
 	return &Faucet{
 		Config:      config,
 		GRPCConn:    grpcConn,
 		FromAddr:    fromAddr,
 		FromPrivKey: fromPrivKey,
-		Account:     account,
+		SignerData:  signerData,
 		TxConfig:    simapp.MakeTestEncodingConfig().TxConfig,
 	}, nil
 }
@@ -68,7 +74,7 @@ func (f *Faucet) SendTxMsg(ctx context.Context, addr string) error {
 		return err
 	}
 
-	err = cosmos.SignTx(f.Config, f.FromPrivKey, f.Account, f.TxConfig, txBuilder)
+	err = cosmos.SignTx(f.FromPrivKey, f.SignerData, f.TxConfig, txBuilder)
 	if err != nil {
 		return err
 	}
