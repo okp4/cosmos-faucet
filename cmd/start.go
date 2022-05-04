@@ -1,13 +1,15 @@
 package cmd
 
 import (
+<<<<<<< HEAD
 	"net/http"
 
+=======
+	"github.com/rs/zerolog/log"
+>>>>>>> ce45dce (feat: move server related code to server package)
 	"okp4/cosmos-faucet/pkg/client"
 	"okp4/cosmos-faucet/pkg/server"
 
-	"github.com/gorilla/mux"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -33,14 +35,8 @@ func NewStartCommand() *cobra.Command {
 				log.Info().Msg("Server stopped")
 			}(faucet)
 
-			router := mux.NewRouter().StrictSlash(true)
-			router.Path("/").
-				Queries("address", "{address}").
-				HandlerFunc(server.NewSendRequestHandlerFn(faucet)).
-				Methods("GET")
-
-			log.Info().Msgf("Server listening at %s", addr)
-			log.Fatal().Err(http.ListenAndServe(addr, router)).Msg("Server listening stopped")
+			httpServer := server.NewServer(faucet)
+			httpServer.Start(addr)
 		},
 	}
 
