@@ -15,11 +15,10 @@ type HttpServer struct {
 
 // NewServer creates a new httpServer containing router
 func NewServer(faucet *client.Faucet) HttpServer {
-	server := HttpServer{}
-
-	server.router = mux.NewRouter().StrictSlash(true)
+	server := HttpServer{
+		router: mux.NewRouter().StrictSlash(true),
+	}
 	server.createRoutes(faucet)
-
 	return server
 }
 

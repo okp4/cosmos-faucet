@@ -11,4 +11,10 @@ func (s HttpServer) createRoutes(faucet *client.Faucet) {
 		Queries("address", "{address}").
 		HandlerFunc(NewSendRequestHandlerFn(context.Background(), faucet)).
 		Methods("GET")
+	s.router.Path("/health").
+		HandlerFunc(NewHealthRequestHandlerFunc()).
+		Methods("GET")
+	s.router.Path("/metrics").
+		HandlerFunc(NewMetricsRequestHandlerFunc(context.Background(), faucet)).
+		Methods("GET")
 }
