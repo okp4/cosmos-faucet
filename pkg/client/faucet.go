@@ -34,9 +34,9 @@ func NewFaucet(config pkg.Config) (*Faucet, error) {
 	case config.NoTLS:
 		opts = insecure.NewCredentials()
 	case config.TLSSkipVerify:
-		credentials.NewTLS(&tls.Config{InsecureSkipVerify: true}) // #nosec G402 : skip lint since it's an optional flag
+		opts = credentials.NewTLS(&tls.Config{InsecureSkipVerify: true}) // #nosec G402 : skip lint since it's an optional flag
 	default:
-		credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})
+		opts = credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})
 	}
 
 	grpcConn, err := grpc.Dial(
