@@ -51,7 +51,6 @@ linters:
     - sqlclosecheck
     - stylecheck
     - tenv
-    - testpackage
     - tparallel
     - unconvert
     - unparam
@@ -100,3 +99,4 @@ issues:
         - unused
         - varcheck
         - wrapcheck
+        - lll
