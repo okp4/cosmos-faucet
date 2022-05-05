@@ -8,6 +8,7 @@ import (
 	"okp4/cosmos-faucet/pkg"
 
 	. "github.com/smartystreets/goconvey/convey"
+
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
