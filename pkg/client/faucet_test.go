@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"testing"
 
 	"okp4/cosmos-faucet/pkg"
@@ -33,6 +34,24 @@ func TestNewFaucet(t *testing.T) {
 			Convey("Faucet should be set with a from private key and from address", func() {
 				So(faucet.FromPrivKey, ShouldNotBeNil)
 				So(faucet.FromAddr, ShouldNotBeNil)
+			})
+		})
+	})
+
+	Convey("Given a configuration with a wrong mnemonic", t, func() {
+		grpcAddre := "127.0.0.1:9090"
+		config := pkg.Config{
+			Prefix:      "okp4",
+			GrpcAddress: grpcAddre,
+			Mnemonic:    "nasty random alter chronic become keen stadium test chaos fashion  rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard",
+		}
+
+		Convey("When creating the new faucet", func() {
+			faucet, err := NewFaucet(config)
+
+			Convey("Faucet creation should fail", func() {
+				So(faucet, ShouldBeNil)
+				So(err, ShouldResemble, errors.New("Invalid mnemonic"))
 			})
 		})
 	})
