@@ -1,8 +1,6 @@
 package server
 
-import (
-    "okp4/cosmos-faucet/pkg/client"
-)
+import "okp4/cosmos-faucet/pkg/client"
 
 func (s *httpServer) createRoutes(faucet *client.Faucet) {
 	s.router.Use(prometheusMiddleware)
