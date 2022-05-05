@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"net/http"
 
 	"okp4/cosmos-faucet/pkg/client"
@@ -37,7 +36,7 @@ func NewStartCommand() *cobra.Command {
 			router := mux.NewRouter().StrictSlash(true)
 			router.Path("/").
 				Queries("address", "{address}").
-				HandlerFunc(server.NewSendRequestHandlerFn(context.Background(), faucet)).
+				HandlerFunc(server.NewSendRequestHandlerFn(faucet)).
 				Methods("GET")
 
 			log.Info().Msgf("Server listening at %s", addr)
