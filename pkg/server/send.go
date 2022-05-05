@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"net/http"
 
 	"okp4/cosmos-faucet/pkg/client"
@@ -11,7 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func newSendRequestHandlerFn(ctx context.Context, faucet *client.Faucet) http.HandlerFunc {
+func newSendRequestHandlerFn(faucet *client.Faucet) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		bech32Addr := vars["address"]
