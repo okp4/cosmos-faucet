@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/zerolog/log"
 )
 
 type responseWriter struct {
@@ -25,9 +27,15 @@ func (rw *responseWriter) WriteHeader(code int) {
 }
 
 func initPrometheus() {
-	_ = prometheus.Register(totalRequests)
-	_ = prometheus.Register(responseStatus)
-	_ = prometheus.Register(httpDuration)
+	if err := prometheus.Register(totalRequests); err != nil {
+		log.Error().Msg(fmt.Sprintf("Error while prometheus client initialization: %v", err))
+	}
+	if err := prometheus.Register(responseStatus); err != nil {
+		log.Error().Msg(fmt.Sprintf("Error while prometheus client initialization: %v", err))
+	}
+	if err := prometheus.Register(httpDuration); err != nil {
+		log.Error().Msg(fmt.Sprintf("Error while prometheus client initialization: %v", err))
+	}
 }
 
 var totalRequests = prometheus.NewCounterVec(
