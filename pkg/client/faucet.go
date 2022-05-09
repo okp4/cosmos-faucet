@@ -29,19 +29,9 @@ func NewFaucet(config pkg.Config) (*Faucet, error) {
 	conf := types.GetConfig()
 	conf.SetBech32PrefixForAccount(config.Prefix, config.Prefix)
 
-	var opts credentials.TransportCredentials
-	switch {
-	case config.NoTLS:
-		opts = insecure.NewCredentials()
-	case config.TLSSkipVerify:
-		opts = credentials.NewTLS(&tls.Config{InsecureSkipVerify: true}) // #nosec G402 : skip lint since it's an optional flag
-	default:
-		opts = credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})
-	}
-
 	grpcConn, err := grpc.Dial(
 		config.GrpcAddress,
-		grpc.WithTransportCredentials(opts),
+		grpc.WithTransportCredentials(getTransportCredentials(config)),
 	)
 	if err != nil {
 		return nil, err
@@ -100,4 +90,15 @@ func (f *Faucet) SendTxMsg(ctx context.Context, addr string) error {
 
 func (f *Faucet) Close() error {
 	return f.GRPCConn.Close()
+}
+
+func getTransportCredentials(config pkg.Config) credentials.TransportCredentials {
+	switch {
+	case config.NoTLS:
+		return insecure.NewCredentials()
+	case config.TLSSkipVerify:
+		return credentials.NewTLS(&tls.Config{InsecureSkipVerify: true}) // #nosec G402 : skip lint since it's an optional flag
+	default:
+		return credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})
+	}
 }
