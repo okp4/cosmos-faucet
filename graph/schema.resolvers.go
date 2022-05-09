@@ -9,22 +9,44 @@ import (
 
 	"okp4/cosmos-faucet/graph/generated"
 	"okp4/cosmos-faucet/graph/model"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/rs/zerolog/log"
 )
 
 func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*model.TxResponse, error) {
 	resp, err := r.Faucet.SendTxMsg(ctx, input.ToAddress)
 
 	if err != nil {
+		log.Err(err).Msg("Transaction failed.")
 		return nil, err
 	}
 
-	return &model.TxResponse{
+	log.Info().
+		Str("toAddress", input.ToAddress).
+		Str("fromAddress", r.Faucet.FromAddr.String()).
+		Msgf("Send %d%s to %s...", r.Faucet.Config.AmountSend, r.Faucet.Config.Denom, input.ToAddress)
+
+	response := &model.TxResponse{
 		Hash:      resp.TxHash,
 		Code:      int(resp.Code),
 		RawLog:    &resp.RawLog,
 		GasWanted: resp.GasWanted,
 		GasUsed:   resp.GasUsed,
-	}, nil
+	}
+
+	log.Debug().
+		Interface("response", response).
+		Msg("Transaction has been broadcast")
+
+	if resp.Code != 0 {
+		graphql.AddErrorf(ctx, "transaction is not successful: %s (code: %d)", resp.RawLog, resp.Code)
+		log.Error().Str("log", resp.RawLog).
+			Uint32("code", resp.Code).
+			Msgf("transaction is not successful")
+	}
+
+	return response, nil
 }
 
 func (r *queryResolver) Health(ctx context.Context) (*string, error) {
