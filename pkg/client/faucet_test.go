@@ -1,12 +1,15 @@
 package client
 
 import (
+	"crypto/tls"
 	"errors"
 	"testing"
 
 	"okp4/cosmos-faucet/pkg"
 
 	. "github.com/smartystreets/goconvey/convey"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func TestNewFaucet(t *testing.T) {
@@ -65,7 +68,7 @@ func TestGetTransportCredentials(t *testing.T) {
 			opts := getTransportCredentials(config)
 
 			Convey("Transport credentials should be set by default on TLS", func() {
-				So(opts.Info().SecurityProtocol, ShouldEqual, "tls")
+				So(opts, ShouldResemble, credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12}))
 			})
 		})
 	})
@@ -77,7 +80,7 @@ func TestGetTransportCredentials(t *testing.T) {
 			opts := getTransportCredentials(config)
 
 			Convey("Transport credentials should be insecure", func() {
-				So(opts.Info().SecurityProtocol, ShouldEqual, "insecure")
+				So(opts, ShouldResemble, insecure.NewCredentials())
 			})
 		})
 	})
@@ -89,7 +92,7 @@ func TestGetTransportCredentials(t *testing.T) {
 			opts := getTransportCredentials(config)
 
 			Convey("Transport credentials should be set on TLS", func() {
-				So(opts.Info().SecurityProtocol, ShouldEqual, "tls")
+				So(opts, ShouldResemble, credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})) // #nosec G402
 			})
 		})
 	})
