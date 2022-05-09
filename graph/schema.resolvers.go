@@ -11,12 +11,20 @@ import (
 	"okp4/cosmos-faucet/graph/model"
 )
 
-func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (string, error) {
-	err := r.Faucet.SendTxMsg(ctx, input.ToAddress)
+func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*model.TxResponse, error) {
+	resp, err := r.Faucet.SendTxMsg(ctx, input.ToAddress)
+
 	if err != nil {
-		return "Error", err
+		return nil, err
 	}
-	return "Success", nil
+
+	return &model.TxResponse{
+		Hash:      resp.TxHash,
+		Code:      int(resp.Code),
+		RawLog:    &resp.RawLog,
+		GasWanted: resp.GasWanted,
+		GasUsed:   resp.GasUsed,
+	}, nil
 }
 
 func (r *queryResolver) Health(ctx context.Context) (*string, error) {

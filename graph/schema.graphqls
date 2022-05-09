@@ -4,12 +4,22 @@
 
 scalar Address
 
+scalar Long
+
 input SendInput {
     toAddress: Address!
 }
 
+type TxResponse {
+    hash: String!
+    code: Int!
+    rawLog: String
+    gasWanted: Long!
+    gasUsed: Long!
+}
+
 type Mutation {
-    send(input: SendInput!): String!
+    send(input: SendInput!): TxResponse!
 }
 
 type Query {

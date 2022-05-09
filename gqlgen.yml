@@ -43,6 +43,14 @@ autobind:
 # modelgen, the others will be allowed when binding to fields. Configure them to
 # your liking
 models:
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Long:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int64
   Address:
     model:
       - okp4/cosmos-faucet/pkg.Address

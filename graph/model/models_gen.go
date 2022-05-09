@@ -5,3 +5,11 @@ package model
 type SendInput struct {
 	ToAddress string `json:"toAddress"`
 }
+
+type TxResponse struct {
+	Hash      string  `json:"hash"`
+	Code      int     `json:"code"`
+	RawLog    *string `json:"rawLog"`
+	GasWanted int64   `json:"gasWanted"`
+	GasUsed   int64   `json:"gasUsed"`
+}
