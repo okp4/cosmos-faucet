@@ -48,6 +48,9 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  UInt64:
+    model:
+      - okp4/cosmos-faucet/pkg.UInt64
   Long:
     model:
       - github.com/99designs/gqlgen/graphql.Int64
