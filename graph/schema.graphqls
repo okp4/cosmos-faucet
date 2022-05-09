@@ -2,8 +2,10 @@
 #
 # https://gqlgen.com/getting-started/
 
+scalar Address
+
 input SendInput {
-    toAddress: String!
+    toAddress: Address!
 }
 
 type Mutation {

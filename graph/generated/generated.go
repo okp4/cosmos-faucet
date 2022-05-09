@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"okp4/cosmos-faucet/graph/model"
+	"okp4/cosmos-faucet/pkg"
 	"strconv"
 	"sync"
 
@@ -166,8 +167,10 @@ var sources = []*ast.Source{
 #
 # https://gqlgen.com/getting-started/
 
+scalar Address
+
 input SendInput {
-    toAddress: String!
+    toAddress: Address!
 }
 
 type Mutation {
@@ -2264,7 +2267,7 @@ func (ec *executionContext) unmarshalInputSendInput(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("toAddress"))
-			it.ToAddress, err = ec.unmarshalNString2string(ctx, v)
+			it.ToAddress, err = ec.unmarshalNAddress2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2700,6 +2703,21 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) unmarshalNAddress2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := pkg.UnmarshalAddress(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAddress2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := pkg.MarshalAddress(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
