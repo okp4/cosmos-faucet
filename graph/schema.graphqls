@@ -1,0 +1,15 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+input SendInput {
+    toAddress: String!
+}
+
+type Mutation {
+    send(input: SendInput!): String!
+}
+
+type Query {
+    health: String
+}
