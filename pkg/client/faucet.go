@@ -53,20 +53,20 @@ func NewFaucet(config pkg.Config) (*Faucet, error) {
 	}, nil
 }
 
-func (f *Faucet) SendTxMsg(ctx context.Context, addr string) error {
+func (f *Faucet) SendTxMsg(ctx context.Context, addr string) (*types.TxResponse, error) {
 	toAddr, err := types.GetFromBech32(addr, f.Config.Prefix)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	txBuilder, err := cosmos.BuildUnsignedTx(f.Config, f.TxConfig, f.FromAddr, toAddr)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	account, err := cosmos.GetAccount(ctx, f.GRPCConn, f.FromAddr.String())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	signerData := signing.SignerData{
@@ -77,12 +77,12 @@ func (f *Faucet) SendTxMsg(ctx context.Context, addr string) error {
 
 	err = cosmos.SignTx(f.FromPrivKey, signerData, f.TxConfig, txBuilder)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	txBytes, err := f.TxConfig.TxEncoder()(txBuilder.GetTx())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	return cosmos.BroadcastTx(ctx, f.GRPCConn, txBytes)

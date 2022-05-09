@@ -20,7 +20,7 @@ func NewSendRequestHandlerFn(faucet *client.Faucet) http.HandlerFunc {
 			Str("fromAddress", faucet.FromAddr.String()).
 			Msgf("Send %d%s to %s...", faucet.Config.AmountSend, faucet.Config.Denom, bech32Addr)
 
-		err := faucet.SendTxMsg(r.Context(), bech32Addr)
+		_, err := faucet.SendTxMsg(r.Context(), bech32Addr)
 
 		if err != nil {
 			log.Err(err).Msg("Transaction failed.")
