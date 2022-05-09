@@ -206,10 +206,10 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
+	{Name: "graph/schema.graphqls", Input: `"""
+Represent a cosmos address as [Betch32](https://en.bitcoin.it/wiki/Bech32) format prefixed by the blockchain prefix.
+e.i. ` + "`" + `cosmos1jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj` + "`" + `
+"""
 scalar Address
 
 scalar Long
@@ -219,14 +219,23 @@ input SendInput {
 }
 
 type TxResponse {
+    """Corresponding to the transaction hash."""
     hash: String!
+    """
+    Return the result code of transaction.
+    See code correspondence error : https://github.com/cosmos/cosmos-sdk/blob/main/types/errors/errors.go
+    """
     code: Int!
+    """Description of error if available."""
     rawLog: String
     gasWanted: Long!
     gasUsed: Long!
 }
 
 type Mutation {
+    """
+    Send the configured amount of token to the given address.
+    """
     send(input: SendInput!): TxResponse!
 }
 

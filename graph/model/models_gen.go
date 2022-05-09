@@ -7,8 +7,12 @@ type SendInput struct {
 }
 
 type TxResponse struct {
-	Hash      string  `json:"hash"`
-	Code      int     `json:"code"`
+	// Corresponding to the transaction hash.
+	Hash string `json:"hash"`
+	// Return the result code of transaction.
+	// See code correspondence error : https://github.com/cosmos/cosmos-sdk/blob/main/types/errors/errors.go
+	Code int `json:"code"`
+	// Description of error if available.
 	RawLog    *string `json:"rawLog"`
 	GasWanted int64   `json:"gasWanted"`
 	GasUsed   int64   `json:"gasUsed"`
