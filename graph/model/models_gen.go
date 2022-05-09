@@ -2,6 +2,16 @@
 
 package model
 
+type Configuration struct {
+	ChainID    string `json:"chainId"`
+	Denom      string `json:"denom"`
+	Prefix     string `json:"prefix"`
+	AmountSend int64  `json:"amountSend"`
+	FeeAmount  int64  `json:"feeAmount"`
+	Memo       string `json:"memo"`
+	GasLimit   uint64 `json:"gasLimit"`
+}
+
 type SendInput struct {
 	ToAddress string `json:"toAddress"`
 }

@@ -11,6 +11,7 @@ import (
 	"okp4/cosmos-faucet/pkg"
 	"strconv"
 	"sync"
+	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -44,12 +45,22 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Configuration struct {
+		AmountSend func(childComplexity int) int
+		ChainID    func(childComplexity int) int
+		Denom      func(childComplexity int) int
+		FeeAmount  func(childComplexity int) int
+		GasLimit   func(childComplexity int) int
+		Memo       func(childComplexity int) int
+		Prefix     func(childComplexity int) int
+	}
+
 	Mutation struct {
 		Send func(childComplexity int, input model.SendInput) int
 	}
 
 	Query struct {
-		Health func(childComplexity int) int
+		Configuration func(childComplexity int) int
 	}
 
 	TxResponse struct {
@@ -65,7 +76,7 @@ type MutationResolver interface {
 	Send(ctx context.Context, input model.SendInput) (*model.TxResponse, error)
 }
 type QueryResolver interface {
-	Health(ctx context.Context) (*string, error)
+	Configuration(ctx context.Context) (*model.Configuration, error)
 }
 
 type executableSchema struct {
@@ -83,6 +94,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Configuration.amountSend":
+		if e.complexity.Configuration.AmountSend == nil {
+			break
+		}
+
+		return e.complexity.Configuration.AmountSend(childComplexity), true
+
+	case "Configuration.chainId":
+		if e.complexity.Configuration.ChainID == nil {
+			break
+		}
+
+		return e.complexity.Configuration.ChainID(childComplexity), true
+
+	case "Configuration.denom":
+		if e.complexity.Configuration.Denom == nil {
+			break
+		}
+
+		return e.complexity.Configuration.Denom(childComplexity), true
+
+	case "Configuration.feeAmount":
+		if e.complexity.Configuration.FeeAmount == nil {
+			break
+		}
+
+		return e.complexity.Configuration.FeeAmount(childComplexity), true
+
+	case "Configuration.gasLimit":
+		if e.complexity.Configuration.GasLimit == nil {
+			break
+		}
+
+		return e.complexity.Configuration.GasLimit(childComplexity), true
+
+	case "Configuration.memo":
+		if e.complexity.Configuration.Memo == nil {
+			break
+		}
+
+		return e.complexity.Configuration.Memo(childComplexity), true
+
+	case "Configuration.prefix":
+		if e.complexity.Configuration.Prefix == nil {
+			break
+		}
+
+		return e.complexity.Configuration.Prefix(childComplexity), true
+
 	case "Mutation.send":
 		if e.complexity.Mutation.Send == nil {
 			break
@@ -95,12 +155,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Send(childComplexity, args["input"].(model.SendInput)), true
 
-	case "Query.health":
-		if e.complexity.Query.Health == nil {
+	case "Query.configuration":
+		if e.complexity.Query.Configuration == nil {
 			break
 		}
 
-		return e.complexity.Query.Health(childComplexity), true
+		return e.complexity.Query.Configuration(childComplexity), true
 
 	case "TxResponse.code":
 		if e.complexity.TxResponse.Code == nil {
@@ -214,6 +274,8 @@ scalar Address
 
 scalar Long
 
+scalar UInt64
+
 input SendInput {
     toAddress: Address!
 }
@@ -239,8 +301,18 @@ type Mutation {
     send(input: SendInput!): TxResponse!
 }
 
+type Configuration {
+    chainId: String!
+    denom: String!
+    prefix: String!
+    amountSend: Long!
+    feeAmount: Long!
+    memo: String!
+    gasLimit: UInt64!
+}
+
 type Query {
-    health: String
+    configuration: Configuration!
 }
 `, BuiltIn: false},
 }
@@ -318,6 +390,314 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _Configuration_chainId(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Configuration_chainId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ChainID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Configuration_chainId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Configuration",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Configuration_denom(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Configuration_denom(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Denom, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Configuration_denom(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Configuration",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Configuration_prefix(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Configuration_prefix(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Prefix, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Configuration_prefix(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Configuration",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Configuration_amountSend(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Configuration_amountSend(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AmountSend, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNLong2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Configuration_amountSend(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Configuration",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Long does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Configuration_feeAmount(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Configuration_feeAmount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FeeAmount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNLong2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Configuration_feeAmount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Configuration",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Long does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Configuration_memo(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Configuration_memo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Memo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Configuration_memo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Configuration",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Configuration_gasLimit(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Configuration_gasLimit(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GasLimit, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(uint64)
+	fc.Result = res
+	return ec.marshalNUInt642uint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Configuration_gasLimit(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Configuration",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type UInt64 does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_send(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_send(ctx, field)
 	if err != nil {
@@ -385,8 +765,8 @@ func (ec *executionContext) fieldContext_Mutation_send(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_health(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_health(ctx, field)
+func (ec *executionContext) _Query_configuration(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_configuration(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -399,28 +779,47 @@ func (ec *executionContext) _Query_health(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Health(rctx)
+		return ec.resolvers.Query().Configuration(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*model.Configuration)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNConfiguration2ᚖokp4ᚋcosmosᚑfaucetᚋgraphᚋmodelᚐConfiguration(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_health(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_configuration(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "chainId":
+				return ec.fieldContext_Configuration_chainId(ctx, field)
+			case "denom":
+				return ec.fieldContext_Configuration_denom(ctx, field)
+			case "prefix":
+				return ec.fieldContext_Configuration_prefix(ctx, field)
+			case "amountSend":
+				return ec.fieldContext_Configuration_amountSend(ctx, field)
+			case "feeAmount":
+				return ec.fieldContext_Configuration_feeAmount(ctx, field)
+			case "memo":
+				return ec.fieldContext_Configuration_memo(ctx, field)
+			case "gasLimit":
+				return ec.fieldContext_Configuration_gasLimit(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Configuration", field.Name)
 		},
 	}
 	return fc, nil
@@ -2576,6 +2975,76 @@ func (ec *executionContext) unmarshalInputSendInput(ctx context.Context, obj int
 
 // region    **************************** object.gotpl ****************************
 
+var configurationImplementors = []string{"Configuration"}
+
+func (ec *executionContext) _Configuration(ctx context.Context, sel ast.SelectionSet, obj *model.Configuration) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, configurationImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Configuration")
+		case "chainId":
+
+			out.Values[i] = ec._Configuration_chainId(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "denom":
+
+			out.Values[i] = ec._Configuration_denom(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "prefix":
+
+			out.Values[i] = ec._Configuration_prefix(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "amountSend":
+
+			out.Values[i] = ec._Configuration_amountSend(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "feeAmount":
+
+			out.Values[i] = ec._Configuration_feeAmount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "memo":
+
+			out.Values[i] = ec._Configuration_memo(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "gasLimit":
+
+			out.Values[i] = ec._Configuration_gasLimit(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2634,7 +3103,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "health":
+		case "configuration":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2643,7 +3112,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_health(ctx, field)
+				res = ec._Query_configuration(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			}
 
@@ -3078,6 +3550,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNConfiguration2okp4ᚋcosmosᚑfaucetᚋgraphᚋmodelᚐConfiguration(ctx context.Context, sel ast.SelectionSet, v model.Configuration) graphql.Marshaler {
+	return ec._Configuration(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNConfiguration2ᚖokp4ᚋcosmosᚑfaucetᚋgraphᚋmodelᚐConfiguration(ctx context.Context, sel ast.SelectionSet, v *model.Configuration) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Configuration(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3140,6 +3626,21 @@ func (ec *executionContext) marshalNTxResponse2ᚖokp4ᚋcosmosᚑfaucetᚋgraph
 		return graphql.Null
 	}
 	return ec._TxResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUInt642uint64(ctx context.Context, v interface{}) (uint64, error) {
+	res, err := pkg.UnmarshalUInt64(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUInt642uint64(ctx context.Context, sel ast.SelectionSet, v uint64) graphql.Marshaler {
+	res := pkg.MarshalUInt64(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

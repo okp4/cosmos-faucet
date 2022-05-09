@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"okp4/cosmos-faucet/graph/generated"
 	"okp4/cosmos-faucet/graph/model"
@@ -49,8 +48,16 @@ func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*mo
 	return response, nil
 }
 
-func (r *queryResolver) Health(ctx context.Context) (*string, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Configuration(ctx context.Context) (*model.Configuration, error) {
+	return &model.Configuration{
+		ChainID:    r.Faucet.Config.ChainID,
+		Denom:      r.Faucet.Config.Denom,
+		Prefix:     r.Faucet.Config.Prefix,
+		AmountSend: r.Faucet.Config.AmountSend,
+		FeeAmount:  r.Faucet.Config.FeeAmount,
+		Memo:       r.Faucet.Config.Memo,
+		GasLimit:   r.Faucet.Config.GasLimit,
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

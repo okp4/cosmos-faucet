@@ -6,6 +6,8 @@ scalar Address
 
 scalar Long
 
+scalar UInt64
+
 input SendInput {
     toAddress: Address!
 }
@@ -31,6 +33,16 @@ type Mutation {
     send(input: SendInput!): TxResponse!
 }
 
+type Configuration {
+    chainId: String!
+    denom: String!
+    prefix: String!
+    amountSend: Long!
+    feeAmount: Long!
+    memo: String!
+    gasLimit: UInt64!
+}
+
 type Query {
-    health: String
+    configuration: Configuration!
 }
