@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-
 	"okp4/cosmos-faucet/pkg/client"
 
 	"github.com/gorilla/mux"
@@ -24,7 +23,6 @@ func NewServer(faucet *client.Faucet) HTTPServer {
 		router: mux.NewRouter().StrictSlash(true),
 	}
 	server.createRoutes(faucet)
-	initPrometheus()
 	return server
 }
 

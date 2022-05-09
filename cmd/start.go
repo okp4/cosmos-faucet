@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"okp4/cosmos-faucet/internal/server"
 	"okp4/cosmos-faucet/pkg/client"
-	"okp4/cosmos-faucet/pkg/server"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -30,8 +30,7 @@ func NewStartCommand() *cobra.Command {
 				log.Info().Msg("Server stopped")
 			}(faucet)
 
-			httpServer := server.NewServer(faucet)
-			httpServer.Start(addr)
+			server.NewServer(faucet).Start(addr)
 		},
 	}
 

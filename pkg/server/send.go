@@ -10,7 +10,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func newSendRequestHandlerFn(faucet *client.Faucet) http.HandlerFunc {
+// NewSendRequestHandlerFn returns an HTTP REST handler for make transaction to a given address.
+func NewSendRequestHandlerFn(faucet *client.Faucet) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		bech32Addr := vars["address"]
