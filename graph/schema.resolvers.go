@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-
 	"okp4/cosmos-faucet/graph/generated"
 	"okp4/cosmos-faucet/graph/model"
 
