@@ -1,19 +1,20 @@
 package cmd
 
 import (
-	"net/http"
-
+	"okp4/cosmos-faucet/internal/server"
 	"okp4/cosmos-faucet/pkg/client"
-	"okp4/cosmos-faucet/pkg/server"
 
-	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 const (
 	FlagAddress = "address"
+	FlagMetrics = "metrics"
+	FlagHealth  = "health"
 )
+
+var serverConfig server.Config
 
 // NewStartCommand returns a CLI command to start the REST api allowing to send tokens.
 func NewStartCommand() *cobra.Command {
@@ -33,18 +34,14 @@ func NewStartCommand() *cobra.Command {
 				log.Info().Msg("Server stopped")
 			}(faucet)
 
-			router := mux.NewRouter().StrictSlash(true)
-			router.Path("/").
-				Queries("address", "{address}").
-				HandlerFunc(server.NewSendRequestHandlerFn(faucet)).
-				Methods("GET")
-
-			log.Info().Msgf("Server listening at %s", addr)
-			log.Fatal().Err(http.ListenAndServe(addr, router)).Msg("Server listening stopped")
+			serverConfig.Faucet = faucet
+			server.NewServer(serverConfig).Start(addr)
 		},
 	}
 
 	startCmd.Flags().StringVar(&addr, FlagAddress, ":8080", "rest api address")
+	startCmd.Flags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "enable metrics endpoint")
+	startCmd.Flags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "enable health endpoint")
 
 	return startCmd
 }
