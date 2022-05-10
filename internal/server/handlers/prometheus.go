@@ -15,6 +15,11 @@ type responseWriter struct {
 	statusCode int
 }
 
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
 func newResponseWriter(w http.ResponseWriter) *responseWriter {
 	return &responseWriter{w, http.StatusOK}
 }
@@ -41,11 +46,6 @@ func PrometheusMiddleware(handler http.Handler) http.Handler {
 // NewMetricsRequestHandler exposes prometheus metrics.
 func NewMetricsRequestHandler() http.Handler {
 	return promhttp.Handler()
-}
-
-func (rw *responseWriter) WriteHeader(code int) {
-	rw.statusCode = code
-	rw.ResponseWriter.WriteHeader(code)
 }
 
 var totalRequests = promauto.NewCounterVec(
