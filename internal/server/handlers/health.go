@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/rs/zerolog/log"
@@ -12,7 +11,7 @@ func NewHealthRequestHandlerFunc() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("")); err != nil {
-			log.Error().Msg(fmt.Sprintf("Error while sending health response: %v", err))
+			log.Warn().Msgf("Error while sending health response: %s", err.Error())
 		}
 	}
 }
