@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -10,6 +11,7 @@ import (
 	"okp4/cosmos-faucet/pkg/client"
 
 	gql "github.com/99designs/gqlgen/client"
+	"github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	. "github.com/smartystreets/goconvey/convey"
@@ -25,6 +27,49 @@ var config = pkg.Config{
 	Prefix:      "okp4",
 	GasLimit:    42,
 	Mnemonic:    "nasty random alter chronic become keen stadium test chaos fashion during claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard",
+}
+
+type mockFaucet struct {
+	config    pkg.Config
+	withError bool
+}
+
+func (f mockFaucet) GetConfig() pkg.Config {
+	return config
+}
+
+func (f mockFaucet) GetFromAddr() types.AccAddress {
+	bech32, _ := types.AccAddressFromBech32("okp41jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj")
+	return bech32
+}
+
+func (f mockFaucet) Close() error {
+	panic("implement me")
+}
+
+func (f mockFaucet) SendTxMsg(ctx context.Context, addr string) (*types.TxResponse, error) {
+	var code uint32
+	if f.withError {
+		code = 12
+	} else {
+		code = 0
+	}
+
+	return &types.TxResponse{
+		Height:    0,
+		TxHash:    "HASH",
+		Codespace: "",
+		Code:      code,
+		Data:      "",
+		RawLog:    "",
+		Logs:      nil,
+		Info:      "",
+		GasWanted: 10,
+		GasUsed:   20,
+		Tx:        nil,
+		Timestamp: "",
+		Events:    nil,
+	}, nil
 }
 
 func TestMutationResolver_Send(t *testing.T) {
@@ -55,6 +100,82 @@ func TestMutationResolver_Send(t *testing.T) {
 				var jsonError gql.RawJsonError
 				So(errors.As(err, &jsonError), ShouldBeTrue)
 				So(jsonError.Error(), ShouldContainSubstring, "decoding bech32 failed: invalid character in string: ' '")
+			})
+		})
+	})
+
+	Convey("Given good configured faucet ", t, func() {
+		faucet := mockFaucet{
+			config:    config,
+			withError: false,
+		}
+
+		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet}})))
+
+		m := `
+                mutation {
+                    send(input: {
+                        toAddress: "okp41jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj"
+                    }) {
+                        hash
+                        code
+                        rawLog
+                        gasWanted
+                        gasUsed
+                    }
+                }
+                `
+		var result struct {
+			Send model.TxResponse
+		}
+
+		Convey("When post mutation", func() {
+			err := srv.Post(m, &result)
+
+			Convey("Mutation should be successful", func() {
+				So(err, ShouldBeNil)
+				So(result.Send.Code, ShouldEqual, 0)
+				So(result.Send.Hash, ShouldEqual, "HASH")
+				So(result.Send.GasUsed, ShouldEqual, 20)
+				So(result.Send.GasWanted, ShouldEqual, 10)
+			})
+		})
+	})
+
+	Convey("Given faucet with error", t, func() {
+		faucet := mockFaucet{
+			config:    config,
+			withError: true,
+		}
+
+		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet}})))
+
+		m := `
+                mutation {
+                    send(input: {
+                        toAddress: "okp41jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj"
+                    }) {
+                        hash
+                        code
+                        rawLog
+                        gasWanted
+                        gasUsed
+                    }
+                }
+                `
+		var result struct {
+			Send model.TxResponse
+		}
+
+		Convey("When post mutation", func() {
+			err := srv.Post(m, &result)
+
+			Convey("Mutation should be successful but with error code returned with hash of failed transaction", func() {
+				So(err, ShouldNotBeNil)
+				So(result.Send.Code, ShouldEqual, 12)
+				So(result.Send.Hash, ShouldEqual, "HASH")
+				So(result.Send.GasUsed, ShouldEqual, 20)
+				So(result.Send.GasWanted, ShouldEqual, 10)
 			})
 		})
 	})
