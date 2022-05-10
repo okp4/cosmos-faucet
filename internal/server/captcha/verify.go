@@ -29,7 +29,7 @@ func checkRecaptcha(secret, response string) error {
 	req, err := http.NewRequest(http.MethodPost, siteVerifyURL, nil)
 	if err != nil {
 		log.Error().Msgf("Error while creating Captcha verification request: %s", err.Error())
-		return fmt.Errorf("error while creating Captcha verification request: %s", err.Error())
+		return fmt.Errorf("error while creating Captcha verification request: %w", err)
 	}
 
 	q := req.URL.Query()
@@ -40,14 +40,14 @@ func checkRecaptcha(secret, response string) error {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Error().Msgf("Error while requesting Captcha verification: %s", err.Error())
-		return fmt.Errorf("error while requesting Captcha verification: %s", err.Error())
+		return fmt.Errorf("error while requesting Captcha verification: %w", err)
 	}
 	defer resp.Body.Close()
 
 	var body siteVerifyResponse
 	if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
 		log.Error().Msgf("Error while decoding Captcha verification response: %s", err.Error())
-		return fmt.Errorf("error while decoding Captcha verification response: %s", err.Error())
+		return fmt.Errorf("error while decoding Captcha verification response: %w", err)
 	}
 
 	// If success false, Captcha verification KO.

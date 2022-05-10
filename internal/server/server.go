@@ -1,11 +1,11 @@
 package server
 
 import (
-    "net/http"
-    "okp4/cosmos-faucet/pkg/client"
+	"net/http"
+	"okp4/cosmos-faucet/pkg/client"
 
-    "github.com/gorilla/mux"
-    "github.com/rs/zerolog/log"
+	"github.com/gorilla/mux"
+	"github.com/rs/zerolog/log"
 )
 
 // Config holds config of the http server.

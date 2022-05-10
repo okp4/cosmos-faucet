@@ -45,7 +45,12 @@ func NewStartCommand() *cobra.Command {
 	startCmd.Flags().StringVar(&addr, FlagAddress, ":8080", "rest api address")
 	startCmd.Flags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "enable metrics endpoint")
 	startCmd.Flags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "enable health endpoint")
-	startCmd.Flags().StringVar(&serverConfig.CaptchaSecret, FlagCaptchaSecret, os.Getenv("CAPTCHA_SECRET"), "Set Captcha secret (default from env: CAPTCHA_SECRET)")
+	startCmd.Flags().StringVar(
+		&serverConfig.CaptchaSecret,
+		FlagCaptchaSecret,
+		os.Getenv("CAPTCHA_SECRET"),
+		"set Captcha secret (default from env: CAPTCHA_SECRET)",
+	)
 
 	return startCmd
 }
