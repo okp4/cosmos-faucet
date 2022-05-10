@@ -1,13 +1,11 @@
 package server
 
 import (
-	"net/http"
+    "net/http"
+    "okp4/cosmos-faucet/pkg/client"
 
-	"okp4/cosmos-faucet/pkg/client"
-	"os"
-
-	"github.com/gorilla/mux"
-	"github.com/rs/zerolog/log"
+    "github.com/gorilla/mux"
+    "github.com/rs/zerolog/log"
 )
 
 // Config holds config of the http server.
@@ -33,11 +31,7 @@ func NewServer(config Config) HTTPServer {
 		router: mux.NewRouter().StrictSlash(true),
 	}
 	if config.CaptchaSecret == "" {
-		log.Info().Msgf("Captcha secret not set, checking ENV")
-		config.CaptchaSecret = os.Getenv("CAPTCHA_SECRET")
-		if config.CaptchaSecret == "" {
-			log.Fatal().Msg("Captcha secret not found in ENV")
-		}
+		log.Fatal().Msg("Required Captcha secret not set")
 	}
 	server.createRoutes(config)
 	return server

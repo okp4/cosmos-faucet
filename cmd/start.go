@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"okp4/cosmos-faucet/internal/server"
 	"okp4/cosmos-faucet/pkg/client"
 
@@ -9,9 +11,10 @@ import (
 )
 
 const (
-	FlagAddress = "address"
-	FlagMetrics = "metrics"
-	FlagHealth  = "health"
+	FlagAddress       = "address"
+	FlagMetrics       = "metrics"
+	FlagHealth        = "health"
+	FlagCaptchaSecret = "captcha-secret"
 )
 
 var serverConfig server.Config
@@ -42,6 +45,7 @@ func NewStartCommand() *cobra.Command {
 	startCmd.Flags().StringVar(&addr, FlagAddress, ":8080", "rest api address")
 	startCmd.Flags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "enable metrics endpoint")
 	startCmd.Flags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "enable health endpoint")
+	startCmd.Flags().StringVar(&serverConfig.CaptchaSecret, FlagCaptchaSecret, os.Getenv("CAPTCHA_SECRET"), "Set Captcha secret (default from env: CAPTCHA_SECRET)")
 
 	return startCmd
 }
