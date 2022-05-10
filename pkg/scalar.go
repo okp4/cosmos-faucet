@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/cosmos/cosmos-sdk/types"
 )
 
 func MarshalAddress(a string) graphql.Marshaler {
@@ -18,6 +19,9 @@ func UnmarshalAddress(v interface{}) (string, error) {
 	value, ok := v.(string)
 	if !ok {
 		return "", errors.New("address must be a string")
+	}
+	if _, err := types.AccAddressFromBech32(value); err != nil {
+		return "", err
 	}
 	return value, nil
 }
