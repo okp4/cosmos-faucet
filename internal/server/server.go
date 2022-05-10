@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"okp4/cosmos-faucet/pkg/client"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
@@ -14,6 +15,7 @@ type Config struct {
 	EnableMetrics bool `mapstructure:"metrics"`
 	EnableHealth  bool `mapstructure:"health"`
 	Faucet        client.Faucet
+	CaptchaSecret string `mapstructure:"captcha-secret"`
 }
 
 // HTTPServer exposes server methods.
@@ -29,6 +31,13 @@ type httpServer struct {
 func NewServer(config Config) HTTPServer {
 	server := &httpServer{
 		router: mux.NewRouter().StrictSlash(true),
+	}
+	if config.CaptchaSecret == "" {
+		log.Info().Msgf("Captcha secret not set, checking ENV")
+		config.CaptchaSecret = os.Getenv("CAPTCHA_SECRET")
+		if config.CaptchaSecret == "" {
+			log.Fatal().Msg("Captcha secret not found in ENV")
+		}
 	}
 	server.createRoutes(config)
 	return server
