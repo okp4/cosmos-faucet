@@ -10,7 +10,11 @@ import (
 
 const (
 	FlagAddress = "address"
+	FlagMetrics = "metrics"
+	FlagHealth  = "health"
 )
+
+var serverConfig server.Config
 
 // NewStartCommand returns a CLI command to start the REST api allowing to send tokens.
 func NewStartCommand() *cobra.Command {
@@ -30,11 +34,14 @@ func NewStartCommand() *cobra.Command {
 				log.Info().Msg("Server stopped")
 			}(faucet)
 
+			serverConfig.Faucet = faucet
 			server.NewServer(serverConfig).Start(addr)
 		},
 	}
 
 	startCmd.Flags().StringVar(&addr, FlagAddress, ":8080", "rest api address")
+	startCmd.Flags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "Enable metrics endpoint")
+	startCmd.Flags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "Enable health endpoint")
 
 	return startCmd
 }
