@@ -29,7 +29,6 @@ var config = pkg.Config{
 
 func TestMutationResolver_Send(t *testing.T) {
 	Convey("Given send mutation with a wrong address", t, func() {
-
 		faucet, err := client.NewFaucet(config)
 		if err != nil {
 			return
@@ -48,7 +47,6 @@ func TestMutationResolver_Send(t *testing.T) {
                 `
 
 		Convey("When send mutation", func() {
-
 			err := srv.Post(m, nil)
 
 			Convey("Mutation should return error", func() {
@@ -70,7 +68,6 @@ func TestQueryResolver_Configuration(t *testing.T) {
 		}
 
 		Convey("When create query context with faucet and configuration", func() {
-
 			srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet}})))
 
 			var result struct {

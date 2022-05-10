@@ -17,15 +17,30 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type Faucet struct {
-	Config      pkg.Config
-	GRPCConn    *grpc.ClientConn
-	FromAddr    types.AccAddress
-	FromPrivKey crypto.PrivKey
-	TxConfig    client.TxConfig
+type Faucet interface {
+	GetConfig() pkg.Config
+	GetFromAddr() types.AccAddress
+	SendTxMsg(ctx context.Context, addr string) (*types.TxResponse, error)
+	Close() error
 }
 
-func NewFaucet(config pkg.Config) (*Faucet, error) {
+type faucet struct {
+	config      pkg.Config
+	grpcConn    *grpc.ClientConn
+	fromAddr    types.AccAddress
+	fromPrivKey crypto.PrivKey
+	txConfig    client.TxConfig
+}
+
+func (f faucet) GetFromAddr() types.AccAddress {
+	return f.fromAddr
+}
+
+func (f faucet) GetConfig() pkg.Config {
+	return f.config
+}
+
+func NewFaucet(config pkg.Config) (Faucet, error) {
 	conf := types.GetConfig()
 	conf.SetBech32PrefixForAccount(config.Prefix, config.Prefix)
 
@@ -44,52 +59,52 @@ func NewFaucet(config pkg.Config) (*Faucet, error) {
 
 	fromAddr := types.AccAddress(fromPrivKey.PubKey().Address())
 
-	return &Faucet{
-		Config:      config,
-		GRPCConn:    grpcConn,
-		FromAddr:    fromAddr,
-		FromPrivKey: fromPrivKey,
-		TxConfig:    simapp.MakeTestEncodingConfig().TxConfig,
+	return &faucet{
+		config:      config,
+		grpcConn:    grpcConn,
+		fromAddr:    fromAddr,
+		fromPrivKey: fromPrivKey,
+		txConfig:    simapp.MakeTestEncodingConfig().TxConfig,
 	}, nil
 }
 
-func (f *Faucet) SendTxMsg(ctx context.Context, addr string) (*types.TxResponse, error) {
-	toAddr, err := types.GetFromBech32(addr, f.Config.Prefix)
+func (f faucet) SendTxMsg(ctx context.Context, addr string) (*types.TxResponse, error) {
+	toAddr, err := types.GetFromBech32(addr, f.config.Prefix)
 	if err != nil {
 		return nil, err
 	}
 
-	txBuilder, err := cosmos.BuildUnsignedTx(f.Config, f.TxConfig, f.FromAddr, toAddr)
+	txBuilder, err := cosmos.BuildUnsignedTx(f.config, f.txConfig, f.fromAddr, toAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	account, err := cosmos.GetAccount(ctx, f.GRPCConn, f.FromAddr.String())
+	account, err := cosmos.GetAccount(ctx, f.grpcConn, f.fromAddr.String())
 	if err != nil {
 		return nil, err
 	}
 
 	signerData := signing.SignerData{
-		ChainID:       f.Config.ChainID,
+		ChainID:       f.config.ChainID,
 		AccountNumber: account.GetAccountNumber(),
 		Sequence:      account.GetSequence(),
 	}
 
-	err = cosmos.SignTx(f.FromPrivKey, signerData, f.TxConfig, txBuilder)
+	err = cosmos.SignTx(f.fromPrivKey, signerData, f.txConfig, txBuilder)
 	if err != nil {
 		return nil, err
 	}
 
-	txBytes, err := f.TxConfig.TxEncoder()(txBuilder.GetTx())
+	txBytes, err := f.txConfig.TxEncoder()(txBuilder.GetTx())
 	if err != nil {
 		return nil, err
 	}
 
-	return cosmos.BroadcastTx(ctx, f.GRPCConn, txBytes)
+	return cosmos.BroadcastTx(ctx, f.grpcConn, txBytes)
 }
 
-func (f *Faucet) Close() error {
-	return f.GRPCConn.Close()
+func (f faucet) Close() error {
+	return f.grpcConn.Close()
 }
 
 func getTransportCredentials(config pkg.Config) credentials.TransportCredentials {

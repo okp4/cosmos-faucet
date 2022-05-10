@@ -20,7 +20,7 @@ func NewSendCommand() *cobra.Command {
 				return err
 			}
 
-			defer func(faucet *client.Faucet) {
+			defer func(faucet client.Faucet) {
 				_ = faucet.Close()
 			}(faucet)
 

@@ -11,14 +11,14 @@ import (
 )
 
 // NewSendRequestHandlerFn returns an HTTP REST handler for make transaction to a given address.
-func NewSendRequestHandlerFn(faucet *client.Faucet) http.HandlerFunc {
+func NewSendRequestHandlerFn(faucet client.Faucet) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		bech32Addr := vars["address"]
 
 		log.Info().Str("toAddress", bech32Addr).
-			Str("fromAddress", faucet.FromAddr.String()).
-			Msgf("Send %d%s to %s...", faucet.Config.AmountSend, faucet.Config.Denom, bech32Addr)
+			Str("fromAddress", faucet.GetFromAddr().String()).
+			Msgf("Send %d%s to %s...", faucet.GetConfig().AmountSend, faucet.GetConfig().Denom, bech32Addr)
 
 		_, err := faucet.SendTxMsg(r.Context(), bech32Addr)
 

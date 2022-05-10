@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+
 	"okp4/cosmos-faucet/graph/generated"
 	"okp4/cosmos-faucet/graph/model"
 
@@ -22,8 +23,8 @@ func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*mo
 
 	log.Info().
 		Str("toAddress", input.ToAddress).
-		Str("fromAddress", r.Faucet.FromAddr.String()).
-		Msgf("Send %d%s to %s...", r.Faucet.Config.AmountSend, r.Faucet.Config.Denom, input.ToAddress)
+		Str("fromAddress", r.Faucet.GetFromAddr().String()).
+		Msgf("Send %d%s to %s...", r.Faucet.GetConfig().AmountSend, r.Faucet.GetConfig().Denom, input.ToAddress)
 
 	response := &model.TxResponse{
 		Hash:      resp.TxHash,
@@ -49,13 +50,13 @@ func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*mo
 
 func (r *queryResolver) Configuration(ctx context.Context) (*model.Configuration, error) {
 	return &model.Configuration{
-		ChainID:    r.Faucet.Config.ChainID,
-		Denom:      r.Faucet.Config.Denom,
-		Prefix:     r.Faucet.Config.Prefix,
-		AmountSend: r.Faucet.Config.AmountSend,
-		FeeAmount:  r.Faucet.Config.FeeAmount,
-		Memo:       r.Faucet.Config.Memo,
-		GasLimit:   r.Faucet.Config.GasLimit,
+		ChainID:    r.Faucet.GetConfig().ChainID,
+		Denom:      r.Faucet.GetConfig().Denom,
+		Prefix:     r.Faucet.GetConfig().Prefix,
+		AmountSend: r.Faucet.GetConfig().AmountSend,
+		FeeAmount:  r.Faucet.GetConfig().FeeAmount,
+		Memo:       r.Faucet.GetConfig().Memo,
+		GasLimit:   r.Faucet.GetConfig().GasLimit,
 	}, nil
 }
 
