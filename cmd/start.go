@@ -40,8 +40,8 @@ func NewStartCommand() *cobra.Command {
 	}
 
 	startCmd.Flags().StringVar(&addr, FlagAddress, ":8080", "rest api address")
-	startCmd.Flags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "Enable metrics endpoint")
-	startCmd.Flags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "Enable health endpoint")
+	startCmd.Flags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "enable metrics endpoint")
+	startCmd.Flags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "enable health endpoint")
 
 	return startCmd
 }
