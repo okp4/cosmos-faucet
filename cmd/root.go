@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"okp4/cosmos-faucet/internal/server"
 	"os"
 
 	"okp4/cosmos-faucet/pkg"
@@ -20,6 +21,7 @@ const (
 )
 
 var config pkg.Config
+var serverConfig server.Config
 
 // NewRootCommand returns the root CLI command with persistent flag handling.
 var rootCmd = &cobra.Command{
@@ -45,6 +47,8 @@ func Execute() {
 	rootCmd.PersistentFlags().StringVar(&config.Memo, FlagMemo, "Sent by økp4 faucet", "The memo description")
 	rootCmd.PersistentFlags().Uint64Var(&config.GasLimit, FlagGasLimit, 200000, "Gas limit")
 	rootCmd.PersistentFlags().BoolVar(&config.NoTLS, FlagNoTLS, false, "No encryption with the GRPC endpoint")
+	rootCmd.PersistentFlags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "Enable metrics endpoint")
+	rootCmd.PersistentFlags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "Enable health endpoint")
 	rootCmd.PersistentFlags().BoolVar(&config.TLSSkipVerify,
 		FlagTLSSkipVerify,
 		false,

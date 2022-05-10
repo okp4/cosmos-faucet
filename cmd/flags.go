@@ -12,4 +12,6 @@ const (
 	FlagGasLimit      = "gas-limit"
 	FlagNoTLS         = "no-tls"
 	FlagTLSSkipVerify = "tls-skip-verify"
+	FlagMetrics       = "metrics"
+	FlagHealth        = "health"
 )

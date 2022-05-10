@@ -30,7 +30,7 @@ func NewStartCommand() *cobra.Command {
 				log.Info().Msg("Server stopped")
 			}(faucet)
 
-			server.NewServer(faucet).Start(addr)
+			server.NewServer(serverConfig).Start(addr)
 		},
 	}
 

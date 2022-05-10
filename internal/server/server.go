@@ -8,6 +8,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// Config holds config of the http server.
+type Config struct {
+	EnableMetrics bool `mapstructure:"metrics"`
+	EnableHealth  bool `mapstructure:"health"`
+	Faucet        *client.Faucet
+}
+
 // HTTPServer exposes server methods.
 type HTTPServer interface {
 	Start(string)
@@ -18,11 +25,11 @@ type httpServer struct {
 }
 
 // NewServer creates a new httpServer containing router.
-func NewServer(faucet *client.Faucet) HTTPServer {
+func NewServer(config Config) HTTPServer {
 	server := &httpServer{
 		router: mux.NewRouter().StrictSlash(true),
 	}
-	server.createRoutes(faucet)
+	server.createRoutes(config)
 	return server
 }
 
