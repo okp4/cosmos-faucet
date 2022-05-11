@@ -123,3 +123,20 @@ jobs:
           message: 🙅 Closing the PR because it does not respect naming conventions. Edit the branch name and submit a new PR.
     env:
       GITHUB_TOKEN: ${{ secrets.OKP4_TOKEN }}
+  
+  lint-graphql:
+    runs-on: ubuntu-20.04
+    if: github.actor != 'dependabot[bot]'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+        
+      - name: Lint graphql schema (graphql-schema-linter)
+        run: |
+          npm install -g graphql-schema-linter graphql
+          graphql-schema-linter graph/schema.graphqls  
