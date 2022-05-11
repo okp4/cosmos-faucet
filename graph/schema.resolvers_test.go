@@ -47,7 +47,7 @@ func (f mockFaucet) Close() error {
 	panic("implement me")
 }
 
-func (f mockFaucet) SendTxMsg(ctx context.Context, addr string) (*types.TxResponse, error) {
+func (f mockFaucet) SendTxMsg(_ context.Context, _ string) (*types.TxResponse, error) {
 	var code uint32
 	if f.withError {
 		code = 12
