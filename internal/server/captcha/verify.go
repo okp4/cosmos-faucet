@@ -21,10 +21,6 @@ type siteVerifyResponse struct {
 	ErrorCodes  []string  `json:"error-codes"`
 }
 
-type siteVerifyRequest struct {
-	RecaptchaResponse string `json:"g-recaptcha-response"`
-}
-
 func checkRecaptcha(secret, response string) error {
 	req, err := http.NewRequest(http.MethodPost, siteVerifyURL, nil)
 	if err != nil {
