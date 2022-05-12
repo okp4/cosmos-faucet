@@ -12,9 +12,9 @@ import (
 func (s *httpServer) createRoutes(config Config) {
 	s.router.Use(handlers.PrometheusMiddleware)
 	s.router.Path("/").
-		HandlerFunc(playground.Handler("GraphQL playground", "/query")).
+		HandlerFunc(playground.Handler("GraphQL playground", "/graphql")).
 		Methods("GET")
-	s.router.Path("/query").
+	s.router.Path("/graphql").
 		Handler(graphql.NewDefaultServer(generated.NewExecutableSchema(generated.
 			Config{Resolvers: &graph.Resolver{Faucet: config.Faucet}}))).
 		Methods("GET", "POST", "OPTIONS")
