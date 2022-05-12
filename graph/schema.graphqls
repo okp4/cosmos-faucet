@@ -14,6 +14,8 @@ scalar UInt64
 input SendInput {
     """Address where to send token(s)"""
     toAddress: Address!
+    """Captcha token"""
+    captchaToken: String!
 }
 
 """Represent a transaction response"""

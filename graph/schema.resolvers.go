@@ -5,15 +5,19 @@ package graph
 
 import (
 	"context"
-
 	"okp4/cosmos-faucet/graph/generated"
 	"okp4/cosmos-faucet/graph/model"
+	"okp4/cosmos-faucet/internal/server/captcha"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/rs/zerolog/log"
 )
 
 func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*model.TxResponse, error) {
+	if err := captcha.CheckRecaptcha(r.CaptchaSecret, input.CaptchaToken); err != nil {
+		return nil, err
+	}
+
 	resp, err := r.Faucet.SendTxMsg(ctx, input.ToAddress)
 
 	if err != nil {

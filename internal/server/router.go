@@ -3,7 +3,6 @@ package server
 import (
 	"okp4/cosmos-faucet/graph"
 	"okp4/cosmos-faucet/graph/generated"
-	"okp4/cosmos-faucet/internal/server/captcha"
 	"okp4/cosmos-faucet/internal/server/handlers"
 
 	graphql "github.com/99designs/gqlgen/graphql/handler"
@@ -17,10 +16,8 @@ func (s *httpServer) createRoutes(config Config) {
 		Methods("GET")
 	s.router.Path("/graphql").
 		Handler(
-			captcha.VerificationMiddleware(config.CaptchaSecret)(
-				graphql.NewDefaultServer(
-					generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{Faucet: config.Faucet}}),
-				),
+			graphql.NewDefaultServer(
+				generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{Faucet: config.Faucet, CaptchaSecret: config.CaptchaSecret}}),
 			),
 		).
 		Methods("GET", "POST", "OPTIONS")

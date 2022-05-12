@@ -7,5 +7,6 @@ import "okp4/cosmos-faucet/pkg/client"
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Faucet client.Faucet
+	Faucet        client.Faucet
+	CaptchaSecret string
 }

@@ -21,7 +21,7 @@ type siteVerifyResponse struct {
 	ErrorCodes  []string  `json:"error-codes"`
 }
 
-func checkRecaptcha(secret, response string) error {
+func CheckRecaptcha(secret, response string) error {
 	req, err := http.NewRequest(http.MethodPost, siteVerifyURL, nil)
 	if err != nil {
 		log.Error().Msgf("Error while creating Captcha verification request: %s", err.Error())
