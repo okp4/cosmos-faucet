@@ -8,6 +8,7 @@ import (
 	"okp4/cosmos-faucet/pkg"
 
 	. "github.com/smartystreets/goconvey/convey"
+
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -22,21 +23,23 @@ func TestNewFaucet(t *testing.T) {
 		}
 
 		Convey("When creating the new faucet", func() {
-			faucet, err := NewFaucet(config)
+			object, err := NewFaucet(config)
+			faucet, ok := object.(*faucet)
 
 			Convey("Faucet should be successfully created with given configuration", func() {
 				So(faucet, ShouldNotBeNil)
+				So(ok, ShouldBeTrue)
 				So(err, ShouldBeNil)
-				So(faucet.Config, ShouldResemble, config)
+				So(faucet.config, ShouldResemble, config)
 			})
 
 			Convey("Grpc connection should be target the good address", func() {
-				So(faucet.GRPCConn.Target(), ShouldEqual, grpcAddre)
+				So(faucet.grpcConn.Target(), ShouldEqual, grpcAddre)
 			})
 
 			Convey("Faucet should be set with a from private key and from address", func() {
-				So(faucet.FromPrivKey, ShouldNotBeNil)
-				So(faucet.FromAddr, ShouldNotBeNil)
+				So(faucet.fromPrivKey, ShouldNotBeNil)
+				So(faucet.fromAddr, ShouldNotBeNil)
 			})
 		})
 	})

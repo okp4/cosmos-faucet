@@ -1,0 +1,68 @@
+"""
+Represent a cosmos address as [Betch32](https://en.bitcoin.it/wiki/Bech32) format prefixed by the blockchain prefix.
+e.i. `cosmos1jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj`
+"""
+scalar Address
+
+"""Represent a signed 64-bit integer"""
+scalar Long
+
+"""An unsigned 64-bit integer"""
+scalar UInt64
+
+"""All inputs needed to send token to a given address"""
+input SendInput {
+    """Address where to send token(s)"""
+    toAddress: Address!
+}
+
+"""Represent a transaction response"""
+type TxResponse {
+    """
+    Return the result code of transaction.
+    See code correspondence error : https://github.com/cosmos/cosmos-sdk/blob/main/types/errors/errors.go
+    """
+    code: Int!
+    """Transaction gas used"""
+    gasUsed: Long!
+    """Transaction gas wanted"""
+    gasWanted: Long!
+    """Corresponding to the transaction hash."""
+    hash: String!
+    """Description of error if available."""
+    rawLog: String
+}
+
+"""List of all mutations"""
+type Mutation {
+    """
+    Send the configured amount of token to the given address.
+    """
+    send(input: SendInput!): TxResponse!
+}
+
+"""Represent the actual server configuration"""
+type Configuration {
+    """Amount value of token to send"""
+    amountSend: Long!
+    """The network chain ID"""
+    chainId: String!
+    """Token denom"""
+    denom: String!
+    """Fee amount allowed"""
+    feeAmount: Long!
+    """Gas limit allowed on transaction"""
+    gasLimit: UInt64!
+    """Memo used when send transaction"""
+    memo: String!
+    """Address prefix"""
+    prefix: String!
+}
+
+"""List of all queries"""
+type Query {
+    """
+    This query allow to get the actual server configuration.
+    """
+    configuration: Configuration!
+}

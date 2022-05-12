@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+
 	"okp4/cosmos-faucet/pkg/client"
 
 	"github.com/gorilla/mux"
@@ -12,7 +13,7 @@ import (
 type Config struct {
 	EnableMetrics bool `mapstructure:"metrics"`
 	EnableHealth  bool `mapstructure:"health"`
-	Faucet        *client.Faucet
+	Faucet        client.Faucet
 }
 
 // HTTPServer exposes server methods.

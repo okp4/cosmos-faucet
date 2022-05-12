@@ -2,8 +2,8 @@ package cosmos
 
 import (
 	"context"
-	"errors"
 
+	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	auth "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"google.golang.org/grpc"
@@ -24,7 +24,7 @@ func GetAccount(context context.Context, grpcConn *grpc.ClientConn, address stri
 	return &account, nil
 }
 
-func BroadcastTx(context context.Context, grpcConn *grpc.ClientConn, txBytes []byte) error {
+func BroadcastTx(context context.Context, grpcConn *grpc.ClientConn, txBytes []byte) (*types.TxResponse, error) {
 	txClient := tx.NewServiceClient(grpcConn)
 	grpcRes, err := txClient.BroadcastTx(
 		context,
@@ -34,11 +34,8 @@ func BroadcastTx(context context.Context, grpcConn *grpc.ClientConn, txBytes []b
 		},
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if grpcRes.TxResponse.Code != 0 {
-		return errors.New(grpcRes.TxResponse.RawLog)
-	}
-	return nil
+	return grpcRes.TxResponse, nil
 }

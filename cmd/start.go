@@ -29,7 +29,7 @@ func NewStartCommand() *cobra.Command {
 				log.Fatal().Err(err).Msg("Failed create a new faucet instance")
 			}
 
-			defer func(faucet *client.Faucet) {
+			defer func(faucet client.Faucet) {
 				_ = faucet.Close()
 				log.Info().Msg("Server stopped")
 			}(faucet)

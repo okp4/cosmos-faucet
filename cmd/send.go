@@ -20,11 +20,13 @@ func NewSendCommand() *cobra.Command {
 				return err
 			}
 
-			defer func(faucet *client.Faucet) {
+			defer func(faucet client.Faucet) {
 				_ = faucet.Close()
 			}(faucet)
 
-			return faucet.SendTxMsg(context.Background(), args[0])
+			_, err = faucet.SendTxMsg(context.Background(), args[0])
+
+			return err
 		},
 	}
 
