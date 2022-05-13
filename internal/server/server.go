@@ -30,9 +30,6 @@ func NewServer(config Config) HTTPServer {
 	server := &httpServer{
 		router: mux.NewRouter().StrictSlash(true),
 	}
-	if config.CaptchaSecret == "" {
-		log.Fatal().Msg("Required Captcha secret not set")
-	}
 	server.createRoutes(config)
 	return server
 }
