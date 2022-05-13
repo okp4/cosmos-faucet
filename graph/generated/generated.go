@@ -280,10 +280,10 @@ scalar UInt64
 
 """All inputs needed to send token to a given address"""
 input SendInput {
-    """Address where to send token(s)"""
-    toAddress: Address!
     """Captcha token"""
     captchaToken: String!
+    """Address where to send token(s)"""
+    toAddress: Address!
 }
 
 """Represent a transaction response"""
@@ -2975,19 +2975,19 @@ func (ec *executionContext) unmarshalInputSendInput(ctx context.Context, obj int
 
 	for k, v := range asMap {
 		switch k {
-		case "toAddress":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("toAddress"))
-			it.ToAddress, err = ec.unmarshalNAddress2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "captchaToken":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("captchaToken"))
 			it.CaptchaToken, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "toAddress":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("toAddress"))
+			it.ToAddress, err = ec.unmarshalNAddress2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"okp4/cosmos-faucet/internal/captcha"
 	"testing"
 
 	"okp4/cosmos-faucet/graph/generated"
@@ -47,6 +48,16 @@ func (f mockFaucet) Close() error {
 	panic("implement me")
 }
 
+type mockCaptchaResolver struct{}
+
+func newMockCaptchaResolver() captcha.Resolver {
+	return mockCaptchaResolver{}
+}
+
+func (r mockCaptchaResolver) CheckRecaptcha(_ string) error {
+	return nil
+}
+
 func (f mockFaucet) SendTxMsg(_ context.Context, _ string) (*types.TxResponse, error) {
 	var code uint32
 	if f.withError {
@@ -79,11 +90,12 @@ func TestMutationResolver_Send(t *testing.T) {
 			return
 		}
 
-		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet}})))
+		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet, CaptchaResolver: newMockCaptchaResolver()}})))
 
 		m := `
                 mutation {
                     send(input: {
+                        captchaToken: "token"
                         toAddress: "wrong formated address"
                     }) {
                         hash
@@ -110,11 +122,12 @@ func TestMutationResolver_Send(t *testing.T) {
 			withError: false,
 		}
 
-		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet}})))
+		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet, CaptchaResolver: newMockCaptchaResolver()}})))
 
 		m := `
                 mutation {
                     send(input: {
+                        captchaToken: "token"
                         toAddress: "okp41jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj"
                     }) {
                         hash
@@ -148,11 +161,12 @@ func TestMutationResolver_Send(t *testing.T) {
 			withError: true,
 		}
 
-		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet}})))
+		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet, CaptchaResolver: newMockCaptchaResolver()}})))
 
 		m := `
                 mutation {
                     send(input: {
+                        captchaToken: "token"
                         toAddress: "okp41jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj"
                     }) {
                         hash
@@ -189,7 +203,7 @@ func TestQueryResolver_Configuration(t *testing.T) {
 		}
 
 		Convey("When create query context with faucet and configuration", func() {
-			srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet}})))
+			srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet, CaptchaResolver: newMockCaptchaResolver()}})))
 
 			var result struct {
 				Configuration model.Configuration

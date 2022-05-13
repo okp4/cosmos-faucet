@@ -21,7 +21,7 @@ type siteVerifyResponse struct {
 	ErrorCodes  []string  `json:"error-codes"`
 }
 
-func CheckRecaptcha(secret, response string) error {
+func (c resolver) CheckRecaptcha(response string) error {
 	req, err := http.NewRequest(http.MethodPost, siteVerifyURL, nil)
 	if err != nil {
 		log.Error().Msgf("Error while creating Captcha verification request: %s", err.Error())
@@ -29,7 +29,7 @@ func CheckRecaptcha(secret, response string) error {
 	}
 
 	q := req.URL.Query()
-	q.Add("secret", secret)
+	q.Add("secret", c.secret)
 	q.Add("response", response)
 	req.URL.RawQuery = q.Encode()
 

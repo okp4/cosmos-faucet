@@ -22,10 +22,10 @@ type Configuration struct {
 
 // All inputs needed to send token to a given address
 type SendInput struct {
-	// Address where to send token(s)
-	ToAddress string `json:"toAddress"`
 	// Captcha token
 	CaptchaToken string `json:"captchaToken"`
+	// Address where to send token(s)
+	ToAddress string `json:"toAddress"`
 }
 
 // Represent a transaction response
