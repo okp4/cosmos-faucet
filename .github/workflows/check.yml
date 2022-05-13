@@ -24,4 +24,4 @@ jobs:
       - name: Check graphql schema changes
         uses: kamilkisiela/graphql-inspector@v3.1.2
         with:
-          schema: 'master:graph/schema.graphqls'
+          schema: 'main:graph/schema.graphqls'
