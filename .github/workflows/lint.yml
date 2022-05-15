@@ -143,3 +143,15 @@ jobs:
       - name: Lint graphql schema (graphql-schema-linter)
         run: |
           graphql-schema-linter
+
+  check-schema:
+    runs-on: ubuntu-20.04
+    if: github.actor != 'dependabot[bot]'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Check graphql schema changes
+        uses: kamilkisiela/graphql-inspector@v3.1.2
+        with:
+          schema: 'main:graph/schema.graphqls'
