@@ -155,3 +155,4 @@ jobs:
         uses: kamilkisiela/graphql-inspector@v3.1.2
         with:
           schema: 'main:graph/schema.graphqls'
+          fail-on-breaking: false
