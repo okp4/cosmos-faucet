@@ -1,7 +1,7 @@
 package captcha
 
 import (
-	"context"
+	ctx "context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,7 +27,7 @@ type resolver struct {
 	enable        bool
 }
 
-func (c resolver) CheckRecaptcha(ctx context.Context, response *string) error {
+func (c resolver) CheckRecaptcha(ctx ctx.Context, response *string) error {
 	if !c.enable {
 		return nil
 	}
