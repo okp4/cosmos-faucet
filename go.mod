@@ -13,7 +13,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.11.0
 	github.com/vektah/gqlparser/v2 v2.4.2
-	google.golang.org/grpc v1.46.0
+	google.golang.org/grpc v1.46.2
 	gopkg.in/yaml.v2 v2.4.0
 )
 
