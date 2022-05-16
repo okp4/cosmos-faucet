@@ -20,12 +20,8 @@ func (s *httpServer) createRoutes(config Config) {
 			graphql.NewDefaultServer(
 				generated.NewExecutableSchema(generated.Config{
 					Resolvers: &graph.Resolver{
-						Faucet: config.Faucet,
-						CaptchaResolver: captcha.NewCaptchaResolver(
-							config.CaptchaSecret,
-							config.CaptchaVerifyURL,
-							config.CaptchaMinScore,
-						),
+						Faucet:          config.Faucet,
+						CaptchaResolver: captcha.NewCaptchaResolver(config.CaptchaConf),
 					},
 				}),
 			),

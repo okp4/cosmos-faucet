@@ -15,6 +15,7 @@ const (
 	FlagCaptchaSecret = "captcha-secret"
 	FlagCaptchaURL    = "captcha-verify-url"
 	FlagCaptchaScore  = "captcha-min-score"
+	FlagEnableCaptcha = "captcha"
 )
 
 var serverConfig server.Config
@@ -45,20 +46,26 @@ func NewStartCommand() *cobra.Command {
 	startCmd.Flags().StringVar(&addr, FlagAddress, ":8080", "rest api address")
 	startCmd.Flags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "enable metrics endpoint")
 	startCmd.Flags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "enable health endpoint")
+	startCmd.Flags().BoolVar(
+		&serverConfig.CaptchaConf.Enable,
+		FlagEnableCaptcha,
+		false,
+		"enable captcha verification",
+	)
 	startCmd.Flags().StringVar(
-		&serverConfig.CaptchaSecret,
+		&serverConfig.CaptchaConf.Secret,
 		FlagCaptchaSecret,
 		"",
 		"set Captcha secret",
 	)
 	startCmd.Flags().StringVar(
-		&serverConfig.CaptchaVerifyURL,
+		&serverConfig.CaptchaConf.VerifyURL,
 		FlagCaptchaURL,
 		"https://www.google.com/recaptcha/api/siteverify",
 		"set Captcha verify URL",
 	)
 	startCmd.Flags().Float64Var(
-		&serverConfig.CaptchaMinScore,
+		&serverConfig.CaptchaConf.MinScore,
 		FlagCaptchaScore,
 		0.5,
 		"set Captcha min score",

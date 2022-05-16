@@ -24,9 +24,19 @@ type resolver struct {
 	secret        string
 	siteVerifyURL string
 	minScore      float64
+	enable        bool
 }
 
-func (c resolver) CheckRecaptcha(ctx context.Context, response string) error {
+func (c resolver) CheckRecaptcha(ctx context.Context, response *string) error {
+	if !c.enable {
+		return nil
+	}
+
+	if response == nil {
+		log.Debug().Msg("No captcha token specified")
+		return fmt.Errorf("no captcha token specified")
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.siteVerifyURL, nil)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error while creating Captcha verification request: %s", err.Error())
@@ -35,7 +45,7 @@ func (c resolver) CheckRecaptcha(ctx context.Context, response string) error {
 
 	q := req.URL.Query()
 	q.Add("secret", c.secret)
-	q.Add("response", response)
+	q.Add("response", *response)
 	req.URL.RawQuery = q.Encode()
 
 	resp, err := http.DefaultClient.Do(req)

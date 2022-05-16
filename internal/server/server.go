@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"okp4/cosmos-faucet/internal/captcha"
 	"okp4/cosmos-faucet/pkg/client"
 
 	"github.com/gorilla/mux"
@@ -10,12 +11,10 @@ import (
 
 // Config holds config of the http server.
 type Config struct {
-	EnableMetrics    bool `mapstructure:"metrics"`
-	EnableHealth     bool `mapstructure:"health"`
-	Faucet           client.Faucet
-	CaptchaSecret    string  `mapstructure:"captcha-secret"`
-	CaptchaVerifyURL string  `mapstructure:"captcha-verify-url"`
-	CaptchaMinScore  float64 `mapstructure:"captcha-min-score"`
+	EnableMetrics bool `mapstructure:"metrics"`
+	EnableHealth  bool `mapstructure:"health"`
+	Faucet        client.Faucet
+	CaptchaConf   captcha.ResolverConfig
 }
 
 // HTTPServer exposes server methods.

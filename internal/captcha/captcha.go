@@ -7,16 +7,24 @@ import (
 )
 
 type Resolver interface {
-	CheckRecaptcha(context.Context, string) error
+	CheckRecaptcha(context.Context, *string) error
 }
 
-func NewCaptchaResolver(secret, verifyURL string, minScore float64) Resolver {
-	if secret == "" {
+type ResolverConfig struct {
+	Secret    string  `mapstructure:"captcha-secret"`
+	VerifyURL string  `mapstructure:"captcha-verify-url"`
+	MinScore  float64 `mapstructure:"captcha-min-score"`
+	Enable    bool    `mapstructure:"captcha"`
+}
+
+func NewCaptchaResolver(config ResolverConfig) Resolver {
+	if config.Enable && config.Secret == "" {
 		log.Error().Msg("Required Captcha secret not set")
 	}
 	return resolver{
-		secret:        secret,
-		siteVerifyURL: verifyURL,
-		minScore:      minScore,
+		secret:        config.Secret,
+		siteVerifyURL: config.VerifyURL,
+		minScore:      config.MinScore,
+		enable:        config.Enable,
 	}
 }
