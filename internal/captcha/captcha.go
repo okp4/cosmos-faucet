@@ -1,20 +1,22 @@
 package captcha
 
-import "github.com/rs/zerolog/log"
+import (
+	"context"
+
+	"github.com/rs/zerolog/log"
+)
 
 type Resolver interface {
-	CheckRecaptcha(string) error
+	CheckRecaptcha(context.Context, string) error
 }
 
-type resolver struct {
-	secret string
-}
-
-func NewCaptchaResolver(secret string) Resolver {
+func NewCaptchaResolver(secret, verifyURL string, minScore float64) Resolver {
 	if secret == "" {
-		log.Fatal().Msg("Required Captcha secret not set")
+		log.Error().Msg("Required Captcha secret not set")
 	}
 	return resolver{
-		secret: secret,
+		secret:        secret,
+		siteVerifyURL: verifyURL,
+		minScore:      minScore,
 	}
 }

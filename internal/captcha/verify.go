@@ -1,6 +1,7 @@
 package captcha
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,8 +10,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 )
-
-const siteVerifyURL = "https://www.google.com/recaptcha/api/siteverify"
 
 type siteVerifyResponse struct {
 	Success     bool      `json:"success"`
@@ -21,10 +20,16 @@ type siteVerifyResponse struct {
 	ErrorCodes  []string  `json:"error-codes"`
 }
 
-func (c resolver) CheckRecaptcha(response string) error {
-	req, err := http.NewRequest(http.MethodPost, siteVerifyURL, nil)
+type resolver struct {
+	secret        string
+	siteVerifyURL string
+	minScore      float64
+}
+
+func (c resolver) CheckRecaptcha(ctx context.Context, response string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.siteVerifyURL, nil)
 	if err != nil {
-		log.Error().Msgf("Error while creating Captcha verification request: %s", err.Error())
+		log.Error().Err(err).Msgf("Error while creating Captcha verification request: %s", err.Error())
 		return fmt.Errorf("error while creating Captcha verification request: %w", err)
 	}
 
@@ -35,14 +40,14 @@ func (c resolver) CheckRecaptcha(response string) error {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Error().Msgf("Error while requesting Captcha verification: %s", err.Error())
+		log.Error().Err(err).Msgf("Error while requesting Captcha verification: %s", err.Error())
 		return fmt.Errorf("error while requesting Captcha verification: %w", err)
 	}
 	defer resp.Body.Close()
 
 	var body siteVerifyResponse
 	if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		log.Error().Msgf("Error while decoding Captcha verification response: %s", err.Error())
+		log.Error().Err(err).Msgf("Error while decoding Captcha verification response: %s", err.Error())
 		return fmt.Errorf("error while decoding Captcha verification response: %w", err)
 	}
 
@@ -53,8 +58,8 @@ func (c resolver) CheckRecaptcha(response string) error {
 	}
 
 	// If score is too low, verification KO.
-	if body.Score > 0.5 {
-		log.Debug().Msg("Captcha verification failed: score is too low")
+	if body.Score < c.minScore {
+		log.Debug().Float64("score", body.Score).Msg("Captcha verification failed: score is too low")
 		return errors.New("captcha verification failed: score is too low")
 	}
 

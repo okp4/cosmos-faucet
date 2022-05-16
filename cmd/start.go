@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"os"
-
 	"okp4/cosmos-faucet/internal/server"
 	"okp4/cosmos-faucet/pkg/client"
 
@@ -15,6 +13,8 @@ const (
 	FlagMetrics       = "metrics"
 	FlagHealth        = "health"
 	FlagCaptchaSecret = "captcha-secret"
+	FlagCaptchaURL    = "captcha-verify-url"
+	FlagCaptchaScore  = "captcha-min-score"
 )
 
 var serverConfig server.Config
@@ -48,8 +48,20 @@ func NewStartCommand() *cobra.Command {
 	startCmd.Flags().StringVar(
 		&serverConfig.CaptchaSecret,
 		FlagCaptchaSecret,
-		os.Getenv("CAPTCHA_SECRET"),
-		"set Captcha secret (default from env: CAPTCHA_SECRET)",
+		"",
+		"set Captcha secret",
+	)
+	startCmd.Flags().StringVar(
+		&serverConfig.CaptchaVerifyURL,
+		FlagCaptchaURL,
+		"https://www.google.com/recaptcha/api/siteverify",
+		"set Captcha verify URL",
+	)
+	startCmd.Flags().Float64Var(
+		&serverConfig.CaptchaMinScore,
+		FlagCaptchaScore,
+		0.5,
+		"set Captcha min score",
 	)
 
 	return startCmd

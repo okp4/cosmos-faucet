@@ -54,7 +54,7 @@ func newMockCaptchaResolver() captcha.Resolver {
 	return mockCaptchaResolver{}
 }
 
-func (r mockCaptchaResolver) CheckRecaptcha(_ string) error {
+func (r mockCaptchaResolver) CheckRecaptcha(_ context.Context, _ string) error {
 	return nil
 }
 

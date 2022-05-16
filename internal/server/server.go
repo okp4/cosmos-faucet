@@ -10,10 +10,12 @@ import (
 
 // Config holds config of the http server.
 type Config struct {
-	EnableMetrics bool `mapstructure:"metrics"`
-	EnableHealth  bool `mapstructure:"health"`
-	Faucet        client.Faucet
-	CaptchaSecret string `mapstructure:"captcha-secret"`
+	EnableMetrics    bool `mapstructure:"metrics"`
+	EnableHealth     bool `mapstructure:"health"`
+	Faucet           client.Faucet
+	CaptchaSecret    string  `mapstructure:"captcha-secret"`
+	CaptchaVerifyURL string  `mapstructure:"captcha-verify-url"`
+	CaptchaMinScore  float64 `mapstructure:"captcha-min-score"`
 }
 
 // HTTPServer exposes server methods.

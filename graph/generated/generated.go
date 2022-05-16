@@ -281,7 +281,7 @@ scalar UInt64
 """All inputs needed to send token to a given address"""
 input SendInput {
     """Captcha token"""
-    captchaToken: String!
+    captchaToken: String
     """Address where to send token(s)"""
     toAddress: Address!
 }
@@ -2979,7 +2979,7 @@ func (ec *executionContext) unmarshalInputSendInput(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("captchaToken"))
-			it.CaptchaToken, err = ec.unmarshalNString2string(ctx, v)
+			it.CaptchaToken, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
