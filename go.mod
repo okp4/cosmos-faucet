@@ -6,7 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.5
 	github.com/cosmos/cosmos-sdk v0.45.4
 	github.com/gorilla/mux v1.8.0
-	github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/client_golang v1.12.2
 	github.com/rs/zerolog v1.26.1
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/spf13/cobra v1.4.0
