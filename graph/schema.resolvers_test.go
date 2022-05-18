@@ -3,7 +3,7 @@ package graph
 import (
 	"context"
 	"errors"
-	"okp4/cosmos-faucet/internal/captcha"
+	"okp4/cosmos-faucet/pkg/captcha"
 	"testing"
 
 	"okp4/cosmos-faucet/graph/generated"

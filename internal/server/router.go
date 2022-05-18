@@ -3,8 +3,8 @@ package server
 import (
 	"okp4/cosmos-faucet/graph"
 	"okp4/cosmos-faucet/graph/generated"
-	"okp4/cosmos-faucet/internal/captcha"
 	"okp4/cosmos-faucet/internal/server/handlers"
+	"okp4/cosmos-faucet/pkg/captcha"
 
 	graphql "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"

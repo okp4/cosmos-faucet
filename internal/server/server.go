@@ -2,7 +2,7 @@ package server
 
 import (
 	"net/http"
-	"okp4/cosmos-faucet/internal/captcha"
+	"okp4/cosmos-faucet/pkg/captcha"
 	"okp4/cosmos-faucet/pkg/client"
 
 	"github.com/gorilla/mux"

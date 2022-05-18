@@ -1,7 +1,7 @@
 package graph
 
 import (
-	"okp4/cosmos-faucet/internal/captcha"
+	"okp4/cosmos-faucet/pkg/captcha"
 	"okp4/cosmos-faucet/pkg/client"
 )
 
