@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"okp4/cosmos-faucet/pkg"
 
@@ -71,6 +72,7 @@ func ReadPersistentFlags(cmd *cobra.Command) error {
 	}
 	v.SetEnvPrefix(envPrefix)
 	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
 		if !f.Changed && v.IsSet(f.Name) {

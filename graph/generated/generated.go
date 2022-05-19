@@ -272,28 +272,38 @@ e.i. ` + "`" + `cosmos1jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj` + "`" + `
 """
 scalar Address
 
+"""Represent a signed 64-bit integer"""
 scalar Long
 
+"""An unsigned 64-bit integer"""
 scalar UInt64
 
+"""All inputs needed to send token to a given address"""
 input SendInput {
+    """Captcha token"""
+    captchaToken: String
+    """Address where to send token(s)"""
     toAddress: Address!
 }
 
+"""Represent a transaction response"""
 type TxResponse {
-    """Corresponding to the transaction hash."""
-    hash: String!
     """
     Return the result code of transaction.
     See code correspondence error : https://github.com/cosmos/cosmos-sdk/blob/main/types/errors/errors.go
     """
     code: Int!
+    """Transaction gas used"""
+    gasUsed: Long!
+    """Transaction gas wanted"""
+    gasWanted: Long!
+    """Corresponding to the transaction hash."""
+    hash: String!
     """Description of error if available."""
     rawLog: String
-    gasWanted: Long!
-    gasUsed: Long!
 }
 
+"""List of all mutations"""
 type Mutation {
     """
     Send the configured amount of token to the given address.
@@ -301,17 +311,29 @@ type Mutation {
     send(input: SendInput!): TxResponse!
 }
 
+"""Represent the actual server configuration"""
 type Configuration {
-    chainId: String!
-    denom: String!
-    prefix: String!
+    """Amount value of token to send"""
     amountSend: Long!
+    """The network chain ID"""
+    chainId: String!
+    """Token denom"""
+    denom: String!
+    """Fee amount allowed"""
     feeAmount: Long!
-    memo: String!
+    """Gas limit allowed on transaction"""
     gasLimit: UInt64!
+    """Memo used when send transaction"""
+    memo: String!
+    """Address prefix"""
+    prefix: String!
 }
 
+"""List of all queries"""
 type Query {
+    """
+    This query allow to get the actual server configuration.
+    """
     configuration: Configuration!
 }
 `, BuiltIn: false},
@@ -389,6 +411,50 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Configuration_amountSend(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Configuration_amountSend(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AmountSend, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNLong2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Configuration_amountSend(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Configuration",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Long does not have child fields")
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _Configuration_chainId(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Configuration_chainId(ctx, field)
@@ -478,94 +544,6 @@ func (ec *executionContext) fieldContext_Configuration_denom(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Configuration_prefix(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Configuration_prefix(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Prefix, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Configuration_prefix(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Configuration",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Configuration_amountSend(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Configuration_amountSend(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AmountSend, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int64)
-	fc.Result = res
-	return ec.marshalNLong2int64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Configuration_amountSend(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Configuration",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Long does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Configuration_feeAmount(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Configuration_feeAmount(ctx, field)
 	if err != nil {
@@ -605,50 +583,6 @@ func (ec *executionContext) fieldContext_Configuration_feeAmount(ctx context.Con
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Long does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Configuration_memo(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Configuration_memo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Memo, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Configuration_memo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Configuration",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -698,6 +632,94 @@ func (ec *executionContext) fieldContext_Configuration_gasLimit(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Configuration_memo(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Configuration_memo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Memo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Configuration_memo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Configuration",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Configuration_prefix(ctx context.Context, field graphql.CollectedField, obj *model.Configuration) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Configuration_prefix(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Prefix, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Configuration_prefix(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Configuration",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_send(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_send(ctx, field)
 	if err != nil {
@@ -737,16 +759,16 @@ func (ec *executionContext) fieldContext_Mutation_send(ctx context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "hash":
-				return ec.fieldContext_TxResponse_hash(ctx, field)
 			case "code":
 				return ec.fieldContext_TxResponse_code(ctx, field)
-			case "rawLog":
-				return ec.fieldContext_TxResponse_rawLog(ctx, field)
-			case "gasWanted":
-				return ec.fieldContext_TxResponse_gasWanted(ctx, field)
 			case "gasUsed":
 				return ec.fieldContext_TxResponse_gasUsed(ctx, field)
+			case "gasWanted":
+				return ec.fieldContext_TxResponse_gasWanted(ctx, field)
+			case "hash":
+				return ec.fieldContext_TxResponse_hash(ctx, field)
+			case "rawLog":
+				return ec.fieldContext_TxResponse_rawLog(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TxResponse", field.Name)
 		},
@@ -804,20 +826,20 @@ func (ec *executionContext) fieldContext_Query_configuration(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "amountSend":
+				return ec.fieldContext_Configuration_amountSend(ctx, field)
 			case "chainId":
 				return ec.fieldContext_Configuration_chainId(ctx, field)
 			case "denom":
 				return ec.fieldContext_Configuration_denom(ctx, field)
-			case "prefix":
-				return ec.fieldContext_Configuration_prefix(ctx, field)
-			case "amountSend":
-				return ec.fieldContext_Configuration_amountSend(ctx, field)
 			case "feeAmount":
 				return ec.fieldContext_Configuration_feeAmount(ctx, field)
-			case "memo":
-				return ec.fieldContext_Configuration_memo(ctx, field)
 			case "gasLimit":
 				return ec.fieldContext_Configuration_gasLimit(ctx, field)
+			case "memo":
+				return ec.fieldContext_Configuration_memo(ctx, field)
+			case "prefix":
+				return ec.fieldContext_Configuration_prefix(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Configuration", field.Name)
 		},
@@ -954,50 +976,6 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _TxResponse_hash(ctx context.Context, field graphql.CollectedField, obj *model.TxResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_TxResponse_hash(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Hash, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_TxResponse_hash(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "TxResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _TxResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.TxResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TxResponse_code(ctx, field)
 	if err != nil {
@@ -1042,8 +1020,8 @@ func (ec *executionContext) fieldContext_TxResponse_code(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _TxResponse_rawLog(ctx context.Context, field graphql.CollectedField, obj *model.TxResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_TxResponse_rawLog(ctx, field)
+func (ec *executionContext) _TxResponse_gasUsed(ctx context.Context, field graphql.CollectedField, obj *model.TxResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TxResponse_gasUsed(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1056,28 +1034,31 @@ func (ec *executionContext) _TxResponse_rawLog(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.RawLog, nil
+		return obj.GasUsed, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNLong2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_TxResponse_rawLog(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TxResponse_gasUsed(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TxResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type Long does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1127,8 +1108,8 @@ func (ec *executionContext) fieldContext_TxResponse_gasWanted(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _TxResponse_gasUsed(ctx context.Context, field graphql.CollectedField, obj *model.TxResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_TxResponse_gasUsed(ctx, field)
+func (ec *executionContext) _TxResponse_hash(ctx context.Context, field graphql.CollectedField, obj *model.TxResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TxResponse_hash(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1141,7 +1122,7 @@ func (ec *executionContext) _TxResponse_gasUsed(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.GasUsed, nil
+		return obj.Hash, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1153,19 +1134,60 @@ func (ec *executionContext) _TxResponse_gasUsed(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int64)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNLong2int64(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_TxResponse_gasUsed(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TxResponse_hash(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TxResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Long does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TxResponse_rawLog(ctx context.Context, field graphql.CollectedField, obj *model.TxResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TxResponse_rawLog(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RawLog, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TxResponse_rawLog(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TxResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2953,6 +2975,14 @@ func (ec *executionContext) unmarshalInputSendInput(ctx context.Context, obj int
 
 	for k, v := range asMap {
 		switch k {
+		case "captchaToken":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("captchaToken"))
+			it.CaptchaToken, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "toAddress":
 			var err error
 
@@ -2985,6 +3015,13 @@ func (ec *executionContext) _Configuration(ctx context.Context, sel ast.Selectio
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Configuration")
+		case "amountSend":
+
+			out.Values[i] = ec._Configuration_amountSend(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "chainId":
 
 			out.Values[i] = ec._Configuration_chainId(ctx, field, obj)
@@ -2999,23 +3036,16 @@ func (ec *executionContext) _Configuration(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "prefix":
-
-			out.Values[i] = ec._Configuration_prefix(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "amountSend":
-
-			out.Values[i] = ec._Configuration_amountSend(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "feeAmount":
 
 			out.Values[i] = ec._Configuration_feeAmount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "gasLimit":
+
+			out.Values[i] = ec._Configuration_gasLimit(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -3027,9 +3057,9 @@ func (ec *executionContext) _Configuration(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "gasLimit":
+		case "prefix":
 
-			out.Values[i] = ec._Configuration_gasLimit(ctx, field, obj)
+			out.Values[i] = ec._Configuration_prefix(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -3159,27 +3189,9 @@ func (ec *executionContext) _TxResponse(ctx context.Context, sel ast.SelectionSe
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("TxResponse")
-		case "hash":
-
-			out.Values[i] = ec._TxResponse_hash(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "code":
 
 			out.Values[i] = ec._TxResponse_code(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "rawLog":
-
-			out.Values[i] = ec._TxResponse_rawLog(ctx, field, obj)
-
-		case "gasWanted":
-
-			out.Values[i] = ec._TxResponse_gasWanted(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -3191,6 +3203,24 @@ func (ec *executionContext) _TxResponse(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "gasWanted":
+
+			out.Values[i] = ec._TxResponse_gasWanted(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "hash":
+
+			out.Values[i] = ec._TxResponse_hash(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "rawLog":
+
+			out.Values[i] = ec._TxResponse_rawLog(ctx, field, obj)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

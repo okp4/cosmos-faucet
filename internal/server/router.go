@@ -4,6 +4,7 @@ import (
 	"okp4/cosmos-faucet/graph"
 	"okp4/cosmos-faucet/graph/generated"
 	"okp4/cosmos-faucet/internal/server/handlers"
+	"okp4/cosmos-faucet/pkg/captcha"
 
 	graphql "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -15,8 +16,16 @@ func (s *httpServer) createRoutes(config Config) {
 		HandlerFunc(playground.Handler("GraphQL playground", "/graphql")).
 		Methods("GET")
 	s.router.Path("/graphql").
-		Handler(graphql.NewDefaultServer(generated.NewExecutableSchema(generated.
-			Config{Resolvers: &graph.Resolver{Faucet: config.Faucet}}))).
+		Handler(
+			graphql.NewDefaultServer(
+				generated.NewExecutableSchema(generated.Config{
+					Resolvers: &graph.Resolver{
+						Faucet:          config.Faucet,
+						CaptchaResolver: captcha.NewCaptchaResolver(config.CaptchaConf),
+					},
+				}),
+			),
+		).
 		Methods("GET", "POST", "OPTIONS")
 	if config.EnableHealth {
 		s.router.Path("/health").

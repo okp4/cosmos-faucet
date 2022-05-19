@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-
 	"okp4/cosmos-faucet/graph/generated"
 	"okp4/cosmos-faucet/graph/model"
 
@@ -14,6 +13,10 @@ import (
 )
 
 func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*model.TxResponse, error) {
+	if err := r.CaptchaResolver.CheckRecaptcha(ctx, input.CaptchaToken); err != nil {
+		return nil, err
+	}
+
 	resp, err := r.Faucet.SendTxMsg(ctx, input.ToAddress)
 
 	if err != nil {
