@@ -7,20 +7,21 @@
 [![conventional commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-## Purpose
+This faucet app allows anyone to request tokens for a [Cosmos](https://cosmos.network/) account address, either in command line or in service mode, with optional [ReCaptcha](https://www.google.com/recaptcha/about/) security.
 
-CLI and GraphQL API faucet for cosmos blockchain including captcha verification.
+The faucet app supports any Cosmos based blockchain and is intended to be configured on testnet networks.
 
-## Installation
+## Install
 
 ```sh
-make build
-make install
+go install github.com/okp4/cosmos-faucet@latest
+
+cosmos-faucet --help
 ```
 
 ## Config
 
- Configuration can be passed as CLI argument, configuration file (`config.yml`) or by environment variable prefixed by `FAUCET` (e.i.: `FAUCET_MNEMONIC`).
+ Configuration can be passed as CLI argument, configuration file (`config.yml`) or by environment variable prefixed by `FAUCET` (i.e.: `FAUCET_MNEMONIC`).
 
 ```yml
 grpc-address: 127.0.0.1:9090
@@ -104,6 +105,22 @@ cosmos-faucet start --captcha --captcha-secret $CAPCTHA_SECRET
 ```
 
 Access on playground and documentation at the root of server.
+
+## Build
+
+The project comes with a convenient `Makefile` which depends on [Docker](https://www.docker.com). Please verify that Docker is properly installed and if not, follow the instructions:
+
+- for macOS: <https://docs.docker.com/docker-for-mac/install/>
+- for Windows: <https://docs.docker.com/docker-for-windows/install/>
+- for Linux: <https://docs.docker.com/engine/install/>
+
+To build the app, invoke the following goal `build` of the `Makefile`:
+
+```sh
+make build
+```
+
+The app will be generated under the folder `target/dist`.
 
 ## Contributing
 
