@@ -7,8 +7,106 @@
 [![conventional commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-## Build
+## Purpose
+
+CLI and GraphQL API faucet for cosmos blockchain including captcha verification.
+
+## Installation
 
 ```sh
 make build
+make install
 ```
+
+## Config
+
+ Configuration can be passed as CLI argument, configuration file (`config.yml`) or by environment variable prefixed by `FAUCET` (e.i.: `FAUCET_MNEMONIC`).
+
+```yml
+grpc-address: 127.0.0.1:9090
+mnemonic: "kiwi nuclear blast wet badge..."
+chain-id: testnet-1
+denom: uatom
+prefix: cosmos
+fee-amount: 0
+amount-send: 1
+memo: "Sent by økp4 faucet"
+gas-limit: 200000
+```
+
+## Usage
+
+### CLI
+
+#### Send
+
+```shell
+Send tokens to a given address
+
+Usage:
+  cosmos-faucet send <address> [flags]
+
+Flags:
+  -h, --help   help for send
+
+Global Flags:
+      --amount-send int       Amount send value (default 1)
+      --chain-id string       The network chain ID (default "localnet-okp4-1")
+      --denom string          Token denom (default "know")
+      --fee-amount int        Fee amount
+      --gas-limit uint        Gas limit (default 200000)
+      --grpc-address string   The grpc okp4 server url (default "127.0.0.1:9090")
+      --memo string           The memo description (default "Sent by økp4 faucet")
+      --mnemonic string       
+      --no-tls                No encryption with the GRPC endpoint
+      --prefix string         Address prefix (default "okp4")
+      --tls-skip-verify       Encryption with the GRPC endpoint but skip certificates verification
+```
+
+#### Start
+
+```shell
+Start the GraphQL api
+
+Usage:
+  cosmos-faucet start [flags]
+
+Flags:
+      --address string              graphql api address (default ":8080")
+      --captcha                     enable captcha verification
+      --captcha-min-score float     set Captcha min score (default 0.5)
+      --captcha-secret string       set Captcha secret
+      --captcha-verify-url string   set Captcha verify URL (default "https://www.google.com/recaptcha/api/siteverify")
+      --health                      enable health endpoint
+  -h, --help                        help for start
+      --metrics                     enable metrics endpoint
+
+Global Flags:
+      --amount-send int       Amount send value (default 1)
+      --chain-id string       The network chain ID (default "localnet-okp4-1")
+      --denom string          Token denom (default "know")
+      --fee-amount int        Fee amount
+      --gas-limit uint        Gas limit (default 200000)
+      --grpc-address string   The grpc okp4 server url (default "127.0.0.1:9090")
+      --memo string           The memo description (default "Sent by økp4 faucet")
+      --mnemonic string       
+      --no-tls                No encryption with the GRPC endpoint
+      --prefix string         Address prefix (default "okp4")
+      --tls-skip-verify       Encryption with the GRPC endpoint but skip certificates verification
+```
+
+### GraphQL
+
+Start GraphQL server with captcha verification for the send token mutation.
+
+```shell
+cosmos-faucet start --captcha --captcha-secret $CAPCTHA_SECRET
+```
+
+Access on playground and documentation at the root of server.
+
+## Contributing
+
+So you want to contribute? Great. We appreciate any help you're willing to give. Don't hesitate to open issues and/or submit pull requests.
+
+Remember that this is the faucet we use at OKP4. This is why we may have to refuse change requests simply because they do not comply with our internal requirements, and not because they are not relevant.
