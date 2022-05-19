@@ -26,7 +26,7 @@ func NewStartCommand() *cobra.Command {
 
 	startCmd := &cobra.Command{
 		Use:   "start",
-		Short: "Start the REST api",
+		Short: "Start the GraphQL api",
 		Run: func(cmd *cobra.Command, args []string) {
 			faucet, err := client.NewFaucet(config)
 			if err != nil {
@@ -43,7 +43,7 @@ func NewStartCommand() *cobra.Command {
 		},
 	}
 
-	startCmd.Flags().StringVar(&addr, FlagAddress, ":8080", "rest api address")
+	startCmd.Flags().StringVar(&addr, FlagAddress, ":8080", "graphql api address")
 	startCmd.Flags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "enable metrics endpoint")
 	startCmd.Flags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "enable health endpoint")
 	startCmd.Flags().BoolVar(
