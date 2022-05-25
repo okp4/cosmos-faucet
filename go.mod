@@ -3,7 +3,7 @@ module okp4/cosmos-faucet
 go 1.18
 
 require (
-	github.com/99designs/gqlgen v0.17.7
+	github.com/99designs/gqlgen v0.17.8
 	github.com/cosmos/cosmos-sdk v0.45.4
 	github.com/gorilla/mux v1.8.0
 	github.com/prometheus/client_golang v1.12.2
