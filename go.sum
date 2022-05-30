@@ -870,6 +870,8 @@ github.com/vektah/gqlparser/v2 v2.4.3 h1:pg/VX0B6K9aSdXLsoKQY6XYVJigtWEfClUrv4Io
 github.com/vektah/gqlparser/v2 v2.4.3/go.mod h1:flJWIR04IMQPGz+BXLrORkrARBxv/rtyIAFvd/MceW0=
 github.com/vishvananda/netlink v1.1.0/go.mod h1:cTgwzPIzzgDAYoQrMm0EdrjRUBkTqKYppBueQtXaqoE=
 github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df/go.mod h1:JP3t17pCcGlemwknint6hfoeCVQrEMVwxRLRjXpq+BU=
+github.com/wingyplus/must v0.0.0-20211102134737-321dc31d3ea6 h1:ZeBj7OoOcn11erDQwcfrf4T6bpahwsrh8bT7DrNuv3k=
+github.com/wingyplus/must v0.0.0-20211102134737-321dc31d3ea6/go.mod h1:bqPY4TVVtP8p4siv/VJJY0Ri11jHCcTh4tWj0cYdB1E=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 h1:bAn7/zixMGCfxrRTfdpNzjtPYqr8smhKouy9mxVdGPU=
