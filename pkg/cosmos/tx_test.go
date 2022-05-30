@@ -1,122 +1,122 @@
 package cosmos
 
 import (
-    "testing"
+	"testing"
 
-    "okp4/cosmos-faucet/pkg"
+	"okp4/cosmos-faucet/pkg"
 
-    "github.com/cosmos/cosmos-sdk/client"
-    "github.com/cosmos/cosmos-sdk/simapp"
-    "github.com/cosmos/cosmos-sdk/types"
-    "github.com/cosmos/cosmos-sdk/x/auth/signing"
-    . "github.com/smartystreets/goconvey/convey"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/simapp"
+	"github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/signing"
+	. "github.com/smartystreets/goconvey/convey"
+	"github.com/wingyplus/must"
 )
 
 func newTxConfig() client.TxConfig {
-    enc := simapp.MakeTestEncodingConfig()
-    return enc.TxConfig
+	enc := simapp.MakeTestEncodingConfig()
+	return enc.TxConfig
 }
 
 func TestBuildUnsignedTx(t *testing.T) {
-    Convey("Given a config file and an address", t, func() {
-        config := pkg.Config{
-            Denom:      "know",
-            Prefix:     "okp4",
-            FeeAmount:  20,
-            AmountSend: 10,
-            Memo:       "memo",
-            GasLimit:   2000,
-        }
-        fromAddr := types.AccAddress("okp4AAAAA")
-        toAddr := types.AccAddress("okp4BBB")
+	Convey("Given a config file and an address", t, func() {
+		config := pkg.Config{
+			Denom:      "know",
+			Prefix:     "okp4",
+			FeeAmount:  20,
+			AmountSend: 10,
+			Memo:       "memo",
+			GasLimit:   2000,
+		}
+		fromAddr := types.AccAddress("okp4AAAAA")
+		toAddr := types.AccAddress("okp4BBB")
 
-        Convey("When building an unsigned transaction", func() {
-            unsignedTx, err := BuildUnsignedTx(config, newTxConfig(), fromAddr, toAddr)
+		Convey("When building an unsigned transaction", func() {
+			unsignedTx, err := BuildUnsignedTx(config, newTxConfig(), fromAddr, toAddr)
 
-            Convey("Then the transaction should be successfully built", func() {
-                So(err, ShouldBeNil)
-                So(unsignedTx, ShouldNotBeNil)
-            })
+			Convey("Then the transaction should be successfully built", func() {
+				So(err, ShouldBeNil)
+				So(unsignedTx, ShouldNotBeNil)
+			})
 
-            Convey("And the transaction should be correctly configured", func() {
-                So(unsignedTx.GetTx().GetGas(), ShouldEqual, config.GasLimit)
-                So(unsignedTx.GetTx().GetFee().String(),
-                    ShouldEqual,
-                    types.NewCoins(types.NewInt64Coin(config.Denom, config.FeeAmount)).String())
-                So(unsignedTx.GetTx().GetMemo(), ShouldEqual, config.Memo)
-            })
-        })
-    })
+			Convey("And the transaction should be correctly configured", func() {
+				So(unsignedTx.GetTx().GetGas(), ShouldEqual, config.GasLimit)
+				So(unsignedTx.GetTx().GetFee().String(),
+					ShouldEqual,
+					types.NewCoins(types.NewInt64Coin(config.Denom, config.FeeAmount)).String())
+				So(unsignedTx.GetTx().GetMemo(), ShouldEqual, config.Memo)
+			})
+		})
+	})
 }
 
 func TestSignTx(t *testing.T) {
-    Convey("Given a private key, account and message", t, func() {
-        mnemonic := "nasty random alter chronic become keen stadium test chaos fashion during claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard"
-        privKey, _ := GeneratePrivateKey(mnemonic)
-        config := pkg.Config{
-            Denom:      "know",
-            Prefix:     "okp4",
-            FeeAmount:  20,
-            AmountSend: 10,
-            Memo:       "memo",
-            GasLimit:   2000,
-        }
-        fromAddr := types.AccAddress("okp4AAAAA")
-        toAddr := types.AccAddress("okp4BBB")
-        signerData := signing.SignerData{
-            ChainID:       "chain-id",
-            AccountNumber: 10,
-            Sequence:      54,
-        }
-        tx, _ := BuildUnsignedTx(config, newTxConfig(), fromAddr, toAddr)
+	Convey("Given a private key, account and message", t, func() {
+		privKey := must.Must(GeneratePrivateKey("nasty random alter chronic become keen stadium test chaos fashion during claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard"))
+		config := pkg.Config{
+			Denom:      "know",
+			Prefix:     "okp4",
+			FeeAmount:  20,
+			AmountSend: 10,
+			Memo:       "memo",
+			GasLimit:   2000,
+		}
+		fromAddr := types.AccAddress("okp4AAAAA")
+		toAddr := types.AccAddress("okp4BBB")
 
-        Convey("When signing the transaction", func() {
-            err := SignTx(privKey, signerData, newTxConfig(), tx)
+		Convey("When signing the transaction", func() {
+			signerData := signing.SignerData{
+				ChainID:       "chain-id",
+				AccountNumber: 10,
+				Sequence:      54,
+			}
+			tx, _ := BuildUnsignedTx(config, newTxConfig(), fromAddr, toAddr)
+			err := SignTx(privKey, signerData, newTxConfig(), tx)
 
-            Convey("Then the transaction should be signed", func() {
-                So(err, ShouldBeNil)
+			Convey("Then the transaction should be signed", func() {
+				So(err, ShouldBeNil)
 
-                signatures, err := tx.GetTx().GetSignaturesV2()
-                So(signatures, ShouldNotBeEmpty)
-                So(err, ShouldBeNil)
+				signatures, err := tx.GetTx().GetSignaturesV2()
+				So(signatures, ShouldNotBeEmpty)
+				So(err, ShouldBeNil)
 
-                Convey("And the signature public key should be the same than the signer", func() {
-                    So(signatures[0].PubKey.String(), ShouldEqual, privKey.PubKey().String())
-                })
+				Convey("And the signature public key should be the same than the signer", func() {
+					So(signatures[0].PubKey.String(), ShouldEqual, privKey.PubKey().String())
+				})
 
-                Convey("And the account sequence and number should be correctly set", func() {
-                    So(signatures[0].Sequence, ShouldEqual, signerData.Sequence)
-                })
-            })
-        })
-    })
+				Convey("And the account sequence and number should be correctly set", func() {
+					So(signatures[0].Sequence, ShouldEqual, signerData.Sequence)
+				})
+			})
+		})
+	})
 }
 
 func TestGeneratePrivateKey(t *testing.T) {
-    Convey("Given a well formed mnemonic", t, func() {
-        mnemonic := "nasty random alter chronic become keen stadium test chaos fashion during claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard"
+	Convey("Given a well formed mnemonic", t, func() {
+		mnemonic := "nasty random alter chronic become keen stadium test chaos fashion during claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard"
 
-        Convey("When generating its corresponding private key", func() {
-            privKey, err := GeneratePrivateKey(mnemonic)
+		Convey("When generating its corresponding private key", func() {
+			privKey, err := GeneratePrivateKey(mnemonic)
 
-            Convey("Then The private key have been successfully decoded", func() {
-                So(privKey, ShouldNotBeNil)
-                So(err, ShouldBeNil)
-            })
-        })
-    })
+			Convey("Then The private key have been successfully decoded", func() {
+				So(privKey, ShouldNotBeNil)
+				So(err, ShouldBeNil)
+			})
+		})
+	})
 
-    Convey("Given a malformed mnemonic", t, func() {
-        mnemonic := "nasty random alter chronic become keen stadium test chaos fashion durin claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard"
+	Convey("Given a malformed mnemonic", t, func() {
+		mnemonic := "nasty random alter chronic become keen stadium test chaos fashion durin claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard"
 
-        Convey("When generating its corresponding private key", func() {
-            privKey, err := GeneratePrivateKey(mnemonic)
+		Convey("When generating its corresponding private key", func() {
+			privKey, err := GeneratePrivateKey(mnemonic)
 
-            Convey("Then the private key shall not be decoded", func() {
-                So(privKey, ShouldBeNil)
-                So(err, ShouldNotBeNil)
-                So(err, ShouldBeError, "Invalid mnemonic")
-            })
-        })
-    })
+			Convey("Then the private key shall not be decoded", func() {
+				So(privKey, ShouldBeNil)
+				So(err, ShouldNotBeNil)
+				So(err, ShouldBeError, "Invalid mnemonic")
+			})
+		})
+	})
 }
