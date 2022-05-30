@@ -2,3 +2,7 @@ version: '2'
 exclude_patterns:
   - 'graph/generated/generated.go'
   - 'graph/model/models_gen.go'
+checks:
+  method-lines:
+    config:
+      threshold: 70
