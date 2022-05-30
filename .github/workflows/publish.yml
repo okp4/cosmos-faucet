@@ -55,3 +55,43 @@ jobs:
           push: true
           tags: ${{ steps.docker_metadata.outputs.tags }}
           labels: ${{ steps.docker_metadata.outputs.labels }}
+
+  publish-npm-package:
+    runs-on: ubuntu-20.04
+    concurrency:
+      group: publish-npm-package-${{ github.ref }}
+      cancel-in-progress: true
+    strategy:
+      matrix:
+        registry:
+          - url: "https://npm.pkg.github.com"
+            auth-token: ${{ secrets.NPM_REGISTRY_TOKEN }}
+          - url: "https://registry.npmjs.org"
+            auth-token: ${{ secrets.NPM_PUBLIC_REGISTRY_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Prepare npm project
+        run: ./.github/gen-npm-pjt.sh
+
+      - name: Setup node environment (for publishing)
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.14.0
+          registry-url: ${{ matrix.registry.url }}
+          scope: "@okp4"
+
+      - name: Publish package
+        run: |
+          DATE=$(date +%Y%m%d%H%M%S)
+          publish=(npm publish)
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            publish+=(--tag latest)
+          else
+            publish+=(--prerelease --preid next.$DATE --tag next)
+          fi
+          echo "🚀 Publishing npm package with following command line: ${publish[@]}"
+          "${publish[@]}"
+        env:
+          NODE_AUTH_TOKEN: ${{ matrix.registry.auth-token }}
