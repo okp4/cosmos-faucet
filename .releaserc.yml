@@ -18,6 +18,15 @@ plugins:
               hasChanged: true
               numMatches: 1
               numReplacements: 1
+        - files: [package.json]
+          from: '"version": "\d\.\d\.\d",'
+          to: '"version": "${nextRelease.version}",'
+          countMatches: true
+          results:
+            - file: package.json
+              hasChanged: true
+              numMatches: 1
+              numReplacements: 1
   - - "@semantic-release/exec"
     - prepareCmd: |
         make build-go-all
@@ -39,4 +48,5 @@ plugins:
     - assets:
         - CHANGELOG.md
         - version
+        - package.json
       message: "chore(release): perform release ${nextRelease.version}"
