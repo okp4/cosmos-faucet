@@ -4,7 +4,7 @@
 BINARY_NAME             = cosmos-faucet
 TARGET_FOLDER           = target
 DIST_FOLDER             = $(TARGET_FOLDER)/dist
-DOCKER_IMAGE_GOLANG_CI  = golangci/golangci-lint:v1.45.2
+DOCKER_IMAGE_GOLANG_CI  = golangci/golangci-lint:v1.46.2
 
 # Some colors
 COLOR_GREEN  = $(shell tput -Txterm setaf 2)

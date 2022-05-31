@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"okp4/cosmos-faucet/pkg/captcha"
 	"testing"
 
@@ -16,6 +17,34 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	. "github.com/smartystreets/goconvey/convey"
+
+	"github.com/wingyplus/must"
+)
+
+const (
+	graphQLRequestSendWithIncorrectAddress = `
+                mutation {
+                    send(input: {
+                        captchaToken: "token"
+                        toAddress: "wrong formatted address"
+                    }) {
+                        hash
+                    }
+                }
+                `
+	graphQLRequestSend = `
+                mutation {
+                    send(input: {
+                        captchaToken: "token"
+                        toAddress: "okp41jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj"
+                    }) {
+                        hash
+                        code
+                        rawLog
+                        gasWanted
+                        gasUsed
+                    }
+                }`
 )
 
 var config = pkg.Config{
@@ -84,130 +113,80 @@ func (f mockFaucet) SendTxMsg(_ context.Context, _ string) (*types.TxResponse, e
 }
 
 func TestMutationResolver_Send(t *testing.T) {
-	Convey("Given send mutation with a wrong address", t, func() {
-		faucet, err := client.NewFaucet(config)
-		if err != nil {
-			return
-		}
+	cases := []struct {
+		name              string
+		request           string
+		faucet            client.Faucet
+		expectedError     string
+		expectedCode      int
+		expectedHash      string
+		expectedGasUsed   int64
+		expectedGasWanted int64
+	}{
+		{
+			name:          "a Faucet service configured to succeed and a graphQL 'send' mutation request with an incorrect address",
+			request:       graphQLRequestSendWithIncorrectAddress,
+			faucet:        must.Must(client.NewFaucet(config)),
+			expectedError: "decoding bech32 failed: invalid character in string: ' '",
+		},
+		{
+			name:              "a Faucet service configured to succeed and a correct graphQL 'send' mutation",
+			request:           graphQLRequestSend,
+			faucet:            mockFaucet{config: config},
+			expectedHash:      "HASH",
+			expectedGasUsed:   20,
+			expectedGasWanted: 10,
+		},
+		{
+			name:              "a Faucet service configured to fail and a correct graphQL 'send' mutation",
+			request:           graphQLRequestSend,
+			faucet:            mockFaucet{config: config, withError: true},
+			expectedError:     `transaction is not successful:  (code: 12)","path":["send"]}]`,
+			expectedCode:      12,
+			expectedHash:      "HASH",
+			expectedGasUsed:   20,
+			expectedGasWanted: 10,
+		},
+	}
 
-		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet, CaptchaResolver: newMockCaptchaResolver()}})))
+	for n, c := range cases {
+		Convey(fmt.Sprintf("Given %s (case %d)", c.name, n), t, func() {
+			srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: c.faucet, CaptchaResolver: newMockCaptchaResolver()}})))
 
-		m := `
-                mutation {
-                    send(input: {
-                        captchaToken: "token"
-                        toAddress: "wrong formated address"
-                    }) {
-                        hash
-                    }
-                }
-                `
+			Convey("When posting the graphQL request", func() {
+				var result struct {
+					Send model.TxResponse
+				}
+				err := srv.Post(c.request, &result)
 
-		Convey("When send mutation", func() {
-			err := srv.Post(m, nil)
+				Convey("Then the request should meet expectations", func() {
+					if c.expectedError != "" {
+						So(err, ShouldNotBeNil)
 
-			Convey("Mutation should return error", func() {
-				So(err, ShouldNotBeNil)
+						var jsonError gql.RawJsonError
+						So(errors.As(err, &jsonError), ShouldBeTrue)
+						So(jsonError.Error(), ShouldContainSubstring, c.expectedError)
+					} else {
+						So(err, ShouldBeNil)
+					}
 
-				var jsonError gql.RawJsonError
-				So(errors.As(err, &jsonError), ShouldBeTrue)
-				So(jsonError.Error(), ShouldContainSubstring, "decoding bech32 failed: invalid character in string: ' '")
+					So(result.Send.Code, ShouldEqual, c.expectedCode)
+					So(result.Send.Hash, ShouldEqual, c.expectedHash)
+					So(result.Send.GasUsed, ShouldEqual, c.expectedGasUsed)
+					So(result.Send.GasWanted, ShouldEqual, c.expectedGasWanted)
+				})
 			})
 		})
-	})
-
-	Convey("Given good configured faucet ", t, func() {
-		faucet := mockFaucet{
-			config:    config,
-			withError: false,
-		}
-
-		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet, CaptchaResolver: newMockCaptchaResolver()}})))
-
-		m := `
-                mutation {
-                    send(input: {
-                        captchaToken: "token"
-                        toAddress: "okp41jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj"
-                    }) {
-                        hash
-                        code
-                        rawLog
-                        gasWanted
-                        gasUsed
-                    }
-                }
-                `
-		var result struct {
-			Send model.TxResponse
-		}
-
-		Convey("When post mutation", func() {
-			err := srv.Post(m, &result)
-
-			Convey("Mutation should be successful", func() {
-				So(err, ShouldBeNil)
-				So(result.Send.Code, ShouldEqual, 0)
-				So(result.Send.Hash, ShouldEqual, "HASH")
-				So(result.Send.GasUsed, ShouldEqual, 20)
-				So(result.Send.GasWanted, ShouldEqual, 10)
-			})
-		})
-	})
-
-	Convey("Given faucet with error", t, func() {
-		faucet := mockFaucet{
-			config:    config,
-			withError: true,
-		}
-
-		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet, CaptchaResolver: newMockCaptchaResolver()}})))
-
-		m := `
-                mutation {
-                    send(input: {
-                        captchaToken: "token"
-                        toAddress: "okp41jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj"
-                    }) {
-                        hash
-                        code
-                        rawLog
-                        gasWanted
-                        gasUsed
-                    }
-                }
-                `
-		var result struct {
-			Send model.TxResponse
-		}
-
-		Convey("When post mutation", func() {
-			err := srv.Post(m, &result)
-
-			Convey("Mutation should be successful but with error code returned with hash of failed transaction", func() {
-				So(err, ShouldNotBeNil)
-				So(result.Send.Code, ShouldEqual, 12)
-				So(result.Send.Hash, ShouldEqual, "HASH")
-				So(result.Send.GasUsed, ShouldEqual, 20)
-				So(result.Send.GasWanted, ShouldEqual, 10)
-			})
-		})
-	})
+	}
 }
 
 func TestQueryResolver_Configuration(t *testing.T) {
-	Convey("Given a faucet configuration context to the resolver", t, func() {
-		faucet, err := client.NewFaucet(config)
-		if err != nil {
-			return
-		}
+	Convey("Given a faucet service configured to succeed", t, func() {
+		faucet := must.Must(client.NewFaucet(config))
 
-		Convey("When create query context with faucet and configuration", func() {
-			srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet, CaptchaResolver: newMockCaptchaResolver()}})))
+		srv := gql.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Faucet: faucet, CaptchaResolver: newMockCaptchaResolver()}})))
 
-			var result struct {
-				Configuration model.Configuration
-			}
+		Convey("And a a graphQL 'configuration' query request", func() {
 			q := `
                 query {
                     configuration {
@@ -221,18 +200,25 @@ func TestQueryResolver_Configuration(t *testing.T) {
                     }
                 }
                 `
-			srv.MustPost(q, &result)
+			Convey("When posting the graphQL request", func() {
+				var result struct {
+					Configuration model.Configuration
+				}
 
-			Convey("Configuration should be the same as the given server initialisation", func() {
-				So(err, ShouldBeNil)
-				So(result, ShouldNotBeNil)
-				So(result.Configuration.ChainID, ShouldEqual, config.ChainID)
-				So(result.Configuration.Denom, ShouldEqual, config.Denom)
-				So(result.Configuration.AmountSend, ShouldEqual, config.AmountSend)
-				So(result.Configuration.FeeAmount, ShouldEqual, config.FeeAmount)
-				So(result.Configuration.Memo, ShouldEqual, config.Memo)
-				So(result.Configuration.Prefix, ShouldEqual, config.Prefix)
-				So(result.Configuration.GasLimit, ShouldEqual, config.GasLimit)
+				err := srv.Post(q, &result)
+
+				Convey("Then the returned configuration should be the same as the given server initialisation", func() {
+					So(err, ShouldBeNil)
+
+					So(result, ShouldNotBeNil)
+					So(result.Configuration.ChainID, ShouldEqual, config.ChainID)
+					So(result.Configuration.Denom, ShouldEqual, config.Denom)
+					So(result.Configuration.AmountSend, ShouldEqual, config.AmountSend)
+					So(result.Configuration.FeeAmount, ShouldEqual, config.FeeAmount)
+					So(result.Configuration.Memo, ShouldEqual, config.Memo)
+					So(result.Configuration.Prefix, ShouldEqual, config.Prefix)
+					So(result.Configuration.GasLimit, ShouldEqual, config.GasLimit)
+				})
 			})
 		})
 	})
