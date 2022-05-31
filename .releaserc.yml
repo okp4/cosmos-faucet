@@ -18,12 +18,12 @@ plugins:
               hasChanged: true
               numMatches: 1
               numReplacements: 1
-        - files: [package.json]
+        - files: [.github/package.json]
           from: '"version": "\d\.\d\.\d",'
           to: '"version": "${nextRelease.version}",'
           countMatches: true
           results:
-            - file: package.json
+            - file: .github/package.json
               hasChanged: true
               numMatches: 1
               numReplacements: 1
@@ -48,5 +48,5 @@ plugins:
     - assets:
         - CHANGELOG.md
         - version
-        - package.json
+        - .github/package.json
       message: "chore(release): perform release ${nextRelease.version}"

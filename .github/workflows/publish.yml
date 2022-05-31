@@ -81,6 +81,7 @@ jobs:
 
       - name: Publish package
         run: |
+          cp .github/package.json package.json
           DATE=$(date +%Y%m%d%H%M%S)
           publish=(npm publish)
           if [[ $GITHUB_REF == refs/tags/v* ]]; then
