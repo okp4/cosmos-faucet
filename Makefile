@@ -84,7 +84,7 @@ test: test-go ## Pass all the tests
 
 test-go: build ## Pass the test for the go source code
 	@echo "${COLOR_CYAN} 🧪 Passing go tests${COLOR_RESET}"
-	@go test -v -covermode=count -coverprofile ./target/coverage.out ./...
+	@go test -v -coverprofile ./target/coverage.txt ./...
 
 ## Help:
 help: ## Show this help.
