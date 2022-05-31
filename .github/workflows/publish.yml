@@ -65,9 +65,9 @@ jobs:
       matrix:
         registry:
           - url: "https://npm.pkg.github.com"
-            auth-token: ${{ secrets.NPM_REGISTRY_TOKEN }}
+            auth-token-secret: NPM_REGISTRY_TOKEN
           - url: "https://registry.npmjs.org"
-            auth-token: ${{ secrets.NPM_PUBLIC_REGISTRY_TOKEN }}
+            auth-token-secret: NPM_PUBLIC_REGISTRY_TOKEN
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -92,4 +92,4 @@ jobs:
           echo "🚀 Publishing npm package with following command line: ${publish[@]}"
           "${publish[@]}"
         env:
-          NODE_AUTH_TOKEN: ${{ matrix.registry.auth-token }}
+          NODE_AUTH_TOKEN: ${{ secrets[matrix.registry.auth-token-secret] }}
