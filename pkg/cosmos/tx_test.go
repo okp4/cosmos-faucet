@@ -80,7 +80,7 @@ func TestSignTx(t *testing.T) {
 				So(signatures, ShouldNotBeEmpty)
 				So(err, ShouldBeNil)
 
-				Convey("And the signature public key should be the same than the signer", func() {
+				Convey("And the signature should be the same than the signer public key", func() {
 					So(signatures[0].PubKey.String(), ShouldEqual, privKey.PubKey().String())
 				})
 

@@ -43,7 +43,7 @@ func TestNewFaucet(t *testing.T) {
 		})
 	})
 
-	Convey("Given a configuration with a bad mnemonic", t, func() {
+	Convey("Given a configuration with a wrong mnemonic", t, func() {
 		grpcAddre := "127.0.0.1:9090"
 		config := pkg.Config{
 			Prefix:      "okp4",
