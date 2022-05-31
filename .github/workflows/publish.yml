@@ -83,7 +83,7 @@ jobs:
         run: |
           cp .github/package.json package.json
           DATE=$(date +%Y%m%d%H%M%S)
-          publish=(npm publish --access=public)
+          publish=(yarn publish --access=public --no-git-tag-version --non-interactive)
           if [[ $GITHUB_REF == refs/tags/v* ]]; then
             publish+=(--tag latest)
           else
