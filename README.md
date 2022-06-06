@@ -124,8 +124,10 @@ make build
 
 The app will be generated under the folder `target/dist`.
 
-## Contributing
+## :heart: Supporting this project & Contributing
 
-So you want to contribute? Great. We appreciate any help you're willing to give. Don't hesitate to open issues and/or submit pull requests.
+A simple star in this repository is enough to make us happy!
 
-Remember that this is the faucet we use at OKP4. This is why we may have to refuse change requests simply because they do not comply with our internal requirements, and not because they are not relevant.
+But you're also welcome to contribute! We appreciate any help you're willing to give. Don't hesitate to open issues and/or submit pull requests.
+
+Remember that this is the Cosmos Token Faucet we use at [OKP4](http://okp4.network). This is why we may have to refuse change requests simply because they do not comply with our internal requirements, and not because they are not relevant.
