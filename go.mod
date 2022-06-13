@@ -12,7 +12,7 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.12.0
-	github.com/vektah/gqlparser/v2 v2.4.4
+	github.com/vektah/gqlparser/v2 v2.4.5
 	github.com/wingyplus/must v0.0.0-20211102134737-321dc31d3ea6
 	google.golang.org/grpc v1.47.0
 	gopkg.in/yaml.v2 v2.4.0
