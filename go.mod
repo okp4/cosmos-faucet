@@ -3,7 +3,7 @@ module okp4/cosmos-faucet
 go 1.18
 
 require (
-	github.com/99designs/gqlgen v0.17.12
+	github.com/99designs/gqlgen v0.17.13
 	github.com/cosmos/cosmos-sdk v0.45.6
 	github.com/gorilla/mux v1.8.0
 	github.com/prometheus/client_golang v1.12.2
@@ -73,7 +73,6 @@ require (
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
-	github.com/matryer/moq v0.2.7 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
