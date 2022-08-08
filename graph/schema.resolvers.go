@@ -12,7 +12,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*model.TxResponse, error) {
+// Send is the resolver for the send field.
+func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*string, error) {
 	if err := r.CaptchaResolver.CheckRecaptcha(ctx, input.CaptchaToken); err != nil {
 		return nil, err
 	}
@@ -48,9 +49,10 @@ func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*mo
 			Msgf("transaction is not successful")
 	}
 
-	return response, nil
+	return nil, nil
 }
 
+// Configuration is the resolver for the configuration field.
 func (r *queryResolver) Configuration(ctx context.Context) (*model.Configuration, error) {
 	return &model.Configuration{
 		ChainID:    r.Faucet.GetConfig().ChainID,

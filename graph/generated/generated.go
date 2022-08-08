@@ -73,7 +73,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	Send(ctx context.Context, input model.SendInput) (*model.TxResponse, error)
+	Send(ctx context.Context, input model.SendInput) (*string, error)
 }
 type QueryResolver interface {
 	Configuration(ctx context.Context) (*model.Configuration, error)
@@ -266,7 +266,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `"""
+	{Name: "../schema.graphqls", Input: `"""
 Represent a cosmos address as [Betch32](https://en.bitcoin.it/wiki/Bech32) format prefixed by the blockchain prefix.
 e.i. ` + "`" + `cosmos1jse8senm9hcvydhl8v9x47kfe5z82zmwtw8jvj` + "`" + `
 """
@@ -277,6 +277,9 @@ scalar Long
 
 """An unsigned 64-bit integer"""
 scalar UInt64
+
+"""Represent a void return type, representing no value"""
+scalar Void
 
 """All inputs needed to send token to a given address"""
 input SendInput {
@@ -306,9 +309,13 @@ type TxResponse {
 """List of all mutations"""
 type Mutation {
     """
-    Send the configured amount of token to the given address.
+    Send the configured amount of token to the given address, returning nothing as the transaction is made
+    asynchronously. A successful invocation means that the send operation is queued and will be processed, but it'll
+    does not necessary lead to a successful transaction.
+
+    For clients needing information on the underlying transaction state, consider using the ` + "`" + `send` + "`" + ` subscription.
     """
-    send(input: SendInput!): TxResponse!
+    send(input: SendInput!): Void
 }
 
 """Represent the actual server configuration"""
@@ -741,14 +748,11 @@ func (ec *executionContext) _Mutation_send(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.TxResponse)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNTxResponse2ᚖokp4ᚋcosmosᚑfaucetᚋgraphᚋmodelᚐTxResponse(ctx, field.Selections, res)
+	return ec.marshalOVoid2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_send(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -758,19 +762,7 @@ func (ec *executionContext) fieldContext_Mutation_send(ctx context.Context, fiel
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "code":
-				return ec.fieldContext_TxResponse_code(ctx, field)
-			case "gasUsed":
-				return ec.fieldContext_TxResponse_gasUsed(ctx, field)
-			case "gasWanted":
-				return ec.fieldContext_TxResponse_gasWanted(ctx, field)
-			case "hash":
-				return ec.fieldContext_TxResponse_hash(ctx, field)
-			case "rawLog":
-				return ec.fieldContext_TxResponse_rawLog(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type TxResponse", field.Name)
+			return nil, errors.New("field of type Void does not have child fields")
 		},
 	}
 	defer func() {
@@ -2973,7 +2965,12 @@ func (ec *executionContext) unmarshalInputSendInput(ctx context.Context, obj int
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"captchaToken", "toAddress"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "captchaToken":
 			var err error
@@ -3100,9 +3097,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 				return ec._Mutation_send(ctx, field)
 			})
 
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3644,20 +3638,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTxResponse2okp4ᚋcosmosᚑfaucetᚋgraphᚋmodelᚐTxResponse(ctx context.Context, sel ast.SelectionSet, v model.TxResponse) graphql.Marshaler {
-	return ec._TxResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNTxResponse2ᚖokp4ᚋcosmosᚑfaucetᚋgraphᚋmodelᚐTxResponse(ctx context.Context, sel ast.SelectionSet, v *model.TxResponse) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._TxResponse(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNUInt642uint64(ctx context.Context, v interface{}) (uint64, error) {
 	res, err := pkg.UnmarshalUInt64(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3961,6 +3941,22 @@ func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalString(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOVoid2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOVoid2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

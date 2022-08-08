@@ -41,9 +41,13 @@ type TxResponse {
 """List of all mutations"""
 type Mutation {
     """
-    Send the configured amount of token to the given address.
+    Send the configured amount of token to the given address, returning nothing as the transaction is made
+    asynchronously. A successful invocation means that the send operation is queued and will be processed, but it'll
+    does not necessary lead to a successful transaction.
+
+    For clients needing information on the underlying transaction state, consider using the `send` subscription.
     """
-    send(input: SendInput!): TxResponse!
+    send(input: SendInput!): Void
 }
 
 """Represent the actual server configuration"""
