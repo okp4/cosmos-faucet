@@ -12,15 +12,19 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Faucet interface {
+	Start()
 	GetConfig() pkg.Config
 	GetFromAddr() types.AccAddress
-	SendTxMsg(ctx context.Context, addr string) (*types.TxResponse, error)
+	SubmitTx(ctx context.Context) (*types.TxResponse, error)
+	Send(addr string) error
 	Close() error
 }
 
@@ -30,17 +34,19 @@ type faucet struct {
 	fromAddr    types.AccAddress
 	fromPrivKey crypto.PrivKey
 	txConfig    client.TxConfig
+	buffer      []types.Msg
+	triggerTx   <-chan bool
 }
 
-func (f faucet) GetFromAddr() types.AccAddress {
+func (f *faucet) GetFromAddr() types.AccAddress {
 	return f.fromAddr
 }
 
-func (f faucet) GetConfig() pkg.Config {
+func (f *faucet) GetConfig() pkg.Config {
 	return f.config
 }
 
-func NewFaucet(config pkg.Config) (Faucet, error) {
+func NewFaucet(config pkg.Config, triggerTxChan <-chan bool) (Faucet, error) {
 	conf := types.GetConfig()
 	conf.SetBech32PrefixForAccount(config.Prefix, config.Prefix)
 
@@ -65,16 +71,41 @@ func NewFaucet(config pkg.Config) (Faucet, error) {
 		fromAddr:    fromAddr,
 		fromPrivKey: fromPrivKey,
 		txConfig:    simapp.MakeTestEncodingConfig().TxConfig,
+		triggerTx:   triggerTxChan,
 	}, nil
 }
 
-func (f faucet) SendTxMsg(ctx context.Context, addr string) (*types.TxResponse, error) {
-	toAddr, err := types.GetFromBech32(addr, f.config.Prefix)
-	if err != nil {
-		return nil, err
+func (f *faucet) Start() {
+	go func() {
+		for range f.triggerTx {
+			msgCount := len(f.buffer)
+			resp, err := f.SubmitTx(context.Background())
+			if err != nil {
+				log.Err(err).Int("msgCount", msgCount).Msg("Could not submit transaction")
+			} else if resp != nil {
+				log.Info().
+					Int("messageCount", msgCount).
+					Str("txHash", resp.TxHash).
+					Uint32("txCode", resp.Code).
+					Msg("Successfully submit transaction")
+			} else {
+				log.Info().Msg("No message to submit")
+			}
+		}
+		log.Info().Msg("Stopping submit routine")
+	}()
+}
+
+func (f *faucet) SubmitTx(ctx context.Context) (*types.TxResponse, error) {
+	if len(f.buffer) == 0 {
+		return nil, nil
 	}
 
-	txBuilder, err := cosmos.BuildUnsignedTx(f.config, f.txConfig, f.fromAddr, toAddr)
+	defer func() {
+		f.buffer = f.buffer[:0]
+	}()
+
+	txBuilder, err := cosmos.BuildUnsignedTx(f.config, f.txConfig, f.buffer)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +134,24 @@ func (f faucet) SendTxMsg(ctx context.Context, addr string) (*types.TxResponse, 
 	return cosmos.BroadcastTx(ctx, f.grpcConn, txBytes)
 }
 
-func (f faucet) Close() error {
+func (f *faucet) Send(addr string) error {
+	toAddr, err := types.GetFromBech32(addr, f.config.Prefix)
+	if err != nil {
+		return err
+	}
+
+	f.buffer = append(
+		f.buffer,
+		banktypes.NewMsgSend(
+			f.fromAddr,
+			toAddr,
+			types.NewCoins(types.NewInt64Coin(f.config.Denom, f.config.AmountSend)),
+		),
+	)
+	return nil
+}
+
+func (f *faucet) Close() error {
 	return f.grpcConn.Close()
 }
 

@@ -28,10 +28,12 @@ func NewStartCommand() *cobra.Command {
 		Use:   "start",
 		Short: "Start the GraphQL api",
 		Run: func(cmd *cobra.Command, args []string) {
-			faucet, err := client.NewFaucet(config)
+			faucet, err := client.NewFaucet(config, nil)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed create a new faucet instance")
 			}
+
+			faucet.Start()
 
 			defer func(faucet client.Faucet) {
 				_ = faucet.Close()
