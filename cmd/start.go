@@ -3,6 +3,7 @@ package cmd
 import (
 	"okp4/cosmos-faucet/internal/server"
 	"okp4/cosmos-faucet/pkg/client"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -28,7 +29,14 @@ func NewStartCommand() *cobra.Command {
 		Use:   "start",
 		Short: "Start the GraphQL api",
 		Run: func(cmd *cobra.Command, args []string) {
-			faucet, err := client.NewFaucet(config, nil)
+			triggerTxChan := make(chan bool)
+			go func() {
+				for range time.Tick(5 * time.Second) {
+					triggerTxChan <- true
+				}
+			}()
+
+			faucet, err := client.NewFaucet(config, triggerTxChan)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed create a new faucet instance")
 			}
