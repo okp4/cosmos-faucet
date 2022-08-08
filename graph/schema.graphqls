@@ -10,6 +10,9 @@ scalar Long
 """An unsigned 64-bit integer"""
 scalar UInt64
 
+"""Represent a void return type, representing no value"""
+scalar Void
+
 """All inputs needed to send token to a given address"""
 input SendInput {
     """Captcha token"""
