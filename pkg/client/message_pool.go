@@ -82,6 +82,10 @@ func (pool *MessagePool) Submit() (*types.TxResponse, error) {
 		pool.unlock()
 	}()
 
+	if len(pool.msgs) == 0 {
+		return nil, nil
+	}
+
 	resp, err := pool.submitterFunc(pool.msgs)
 	if err != nil {
 		return nil, err
