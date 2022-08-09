@@ -84,11 +84,19 @@ func (f *faucet) Start() {
 			if err != nil {
 				log.Err(err).Int("msgCount", msgCount).Msg("Could not submit transaction")
 			} else if resp != nil {
-				log.Info().
-					Int("messageCount", msgCount).
-					Str("txHash", resp.TxHash).
-					Uint32("txCode", resp.Code).
-					Msg("Successfully submit transaction")
+				if resp.Code != 0 {
+					log.Warn().
+						Int("messageCount", msgCount).
+						Interface("tx", resp).
+						Msg("Transaction submitted with non 0 code")
+
+				} else {
+					log.Info().
+						Int("messageCount", msgCount).
+						Str("txHash", resp.TxHash).
+						Uint32("txCode", resp.Code).
+						Msg("Successfully submit transaction")
+				}
 			} else {
 				log.Info().Msg("No message to submit")
 			}
