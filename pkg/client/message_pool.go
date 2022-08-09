@@ -35,12 +35,14 @@ func NewMessagePool(opts ...MessagePoolOption) *MessagePool {
 	return pool
 }
 
+// WithTxSubmitter returns a MessagePoolOption to configure the MessagePool TxSubmitter.
 func WithTxSubmitter(submitterFunc TxSubmitter) MessagePoolOption {
 	return func(pool *MessagePool) {
 		pool.submitterFunc = submitterFunc
 	}
 }
 
+// Size returns the size of the pool (i.e. counting the messages only, not the subscribers).
 func (pool *MessagePool) Size() int {
 	return len(pool.msgs)
 }
@@ -73,7 +75,7 @@ func (pool *MessagePool) SubscribeMsg(msg types.Msg) <-chan *types.TxResponse {
 // The subscribed channels will be closed following the transaction response, if an error occur submitting the
 // transaction the channels are closed without any data.
 //
-// Warning: To avoid locking the MessagePool, the channels are closed in separate routines which can lead to goroutine
+// Warning: To avoid locking the MessagePool, the channels are closed in a separate routine which can lead to goroutine
 // leak if they are not consumed.
 func (pool *MessagePool) Submit() (*types.TxResponse, error) {
 	pool.lock()
@@ -107,12 +109,12 @@ func (pool *MessagePool) unlock() {
 }
 
 func (pool *MessagePool) flush() {
-	for _, subscriber := range pool.subscribers {
-		subscriber := subscriber
-		go func() {
+	go func(subscribers []chan *types.TxResponse) {
+		for _, subscriber := range subscribers {
+			subscriber := subscriber
 			close(subscriber)
-		}()
-	}
+		}
+	}(pool.subscribers)
 
 	pool.msgs = pool.msgs[:0]
 	pool.subscribers = pool.subscribers[:0]
