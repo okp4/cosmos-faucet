@@ -45,14 +45,13 @@ func (r *subscriptionResolver) Send(ctx context.Context, input model.SendInput) 
 		return nil, err
 	}
 
-	if err := r.Faucet.Send(input.ToAddress); err != nil {
+	rawTxResponseChan, err := r.Faucet.Subscribe(input.ToAddress)
+	if err != nil {
 		log.Err(err).Str("toAddress", input.ToAddress).Msg("Could not register send request")
 		return nil, err
 	}
 
 	log.Info().Str("toAddress", input.ToAddress).Msg("Register send request")
-
-	rawTxResponseChan := r.Faucet.Subscribe()
 	txResponseChan := make(chan *model.TxResponse)
 	go func() {
 		for rawTx := range rawTxResponseChan {

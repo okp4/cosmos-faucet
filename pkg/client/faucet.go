@@ -25,7 +25,7 @@ type Faucet interface {
 	GetFromAddr() types.AccAddress
 	SubmitTx(ctx context.Context) (*types.TxResponse, error)
 	Send(addr string) error
-	Subscribe() <-chan *types.TxResponse
+	Subscribe(addr string) (<-chan *types.TxResponse, error)
 	Close() error
 }
 
@@ -163,11 +163,14 @@ func (f *faucet) Send(addr string) error {
 	return nil
 }
 
-func (f *faucet) Subscribe() <-chan *types.TxResponse {
+func (f *faucet) Subscribe(addr string) (<-chan *types.TxResponse, error) {
+	if err := f.Send(addr); err != nil {
+		return nil, err
+	}
 	txResponseChan := make(chan *types.TxResponse)
 	f.txResponseChans = append(f.txResponseChans, txResponseChan)
 
-	return txResponseChan
+	return txResponseChan, nil
 }
 
 func (f *faucet) Close() error {
