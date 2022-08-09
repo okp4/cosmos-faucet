@@ -25,17 +25,19 @@ type Faucet interface {
 	GetFromAddr() types.AccAddress
 	SubmitTx(ctx context.Context) (*types.TxResponse, error)
 	Send(addr string) error
+	Subscribe() <-chan *types.TxResponse
 	Close() error
 }
 
 type faucet struct {
-	config      pkg.Config
-	grpcConn    *grpc.ClientConn
-	fromAddr    types.AccAddress
-	fromPrivKey crypto.PrivKey
-	txConfig    client.TxConfig
-	buffer      []types.Msg
-	triggerTx   <-chan bool
+	config          pkg.Config
+	grpcConn        *grpc.ClientConn
+	fromAddr        types.AccAddress
+	fromPrivKey     crypto.PrivKey
+	txConfig        client.TxConfig
+	triggerTx       <-chan bool
+	buffer          []types.Msg
+	txResponseChans []chan *types.TxResponse
 }
 
 func (f *faucet) GetFromAddr() types.AccAddress {
@@ -77,17 +79,27 @@ func NewFaucet(config pkg.Config, triggerTxChan <-chan bool) (Faucet, error) {
 
 func (f *faucet) Start() {
 	go func() {
+		log.Info().Msg("Starting submit routine")
 		for range f.triggerTx {
 			msgCount := len(f.buffer)
 			resp, err := f.SubmitTx(context.Background())
 			if err != nil {
 				log.Err(err).Int("msgCount", msgCount).Msg("Could not submit transaction")
+				for _, txResponseChan := range f.txResponseChans {
+					close(txResponseChan)
+				}
+				f.txResponseChans = f.txResponseChans[:0]
 			} else if resp != nil {
 				log.Info().
 					Int("messageCount", msgCount).
 					Str("txHash", resp.TxHash).
 					Uint32("txCode", resp.Code).
 					Msg("Successfully submit transaction")
+				for _, txResponseChan := range f.txResponseChans {
+					txResponseChan <- resp
+					close(txResponseChan)
+				}
+				f.txResponseChans = f.txResponseChans[:0]
 			} else {
 				log.Info().Msg("No message to submit")
 			}
@@ -149,6 +161,13 @@ func (f *faucet) Send(addr string) error {
 		),
 	)
 	return nil
+}
+
+func (f *faucet) Subscribe() <-chan *types.TxResponse {
+	txResponseChan := make(chan *types.TxResponse)
+	f.txResponseChans = append(f.txResponseChans, txResponseChan)
+
+	return txResponseChan
 }
 
 func (f *faucet) Close() error {

@@ -38,6 +38,19 @@ type TxResponse {
     rawLog: String
 }
 
+"""List of all subscriptions"""
+type Subscription {
+    """
+    Send the configured amount of token to the given address.
+
+    By opening the subscription the send message is added to a queue, once the transaction is successfully submitted
+    with all the queued messages it'll return the corresponding before closing the stream. A successful submission does
+    not mean it has been successfully written in a block, it is the client's responsibility to make additional checks
+    through the transaction's code and hash.
+    """
+    send(input: SendInput!): TxResponse!
+}
+
 """List of all mutations"""
 type Mutation {
     """
