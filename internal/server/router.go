@@ -11,7 +11,6 @@ import (
 )
 
 func (s *httpServer) createRoutes(config Config) {
-	s.router.Use(handlers.PrometheusMiddleware)
 	s.router.Path("/").
 		HandlerFunc(playground.Handler("GraphQL playground", "/graphql")).
 		Methods("GET")
