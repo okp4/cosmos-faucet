@@ -22,7 +22,6 @@ import (
 type Faucet interface {
 	Start()
 	GetConfig() pkg.Config
-	GetFromAddr() types.AccAddress
 	SubmitTx(ctx context.Context) (*types.TxResponse, error)
 	Send(addr string) error
 	Subscribe(addr string) (<-chan *types.TxResponse, error)
@@ -30,22 +29,14 @@ type Faucet interface {
 }
 
 type faucet struct {
-	config          pkg.Config
-	grpcConn        *grpc.ClientConn
-	fromAddr        types.AccAddress
-	fromPrivKey     crypto.PrivKey
-	txConfig        client.TxConfig
-	triggerTx       <-chan bool
-	buffer          []types.Msg
-	txResponseChans []chan *types.TxResponse
-}
-
-func (f *faucet) GetFromAddr() types.AccAddress {
-	return f.fromAddr
-}
-
-func (f *faucet) GetConfig() pkg.Config {
-	return f.config
+	config        pkg.Config
+	fromAddress   types.AccAddress
+	amount        int64
+	denom         string
+	accountPrefix string
+	grpcConn      *grpc.ClientConn
+	triggerTx     <-chan bool
+	pool          *MessagePool
 }
 
 func NewFaucet(config pkg.Config, triggerTxChan <-chan bool) (Faucet, error) {
@@ -65,15 +56,21 @@ func NewFaucet(config pkg.Config, triggerTxChan <-chan bool) (Faucet, error) {
 		return nil, err
 	}
 
-	fromAddr := types.AccAddress(fromPrivKey.PubKey().Address())
+	fromAddress := types.AccAddress(fromPrivKey.PubKey().Address())
 
 	return &faucet{
-		config:      config,
-		grpcConn:    grpcConn,
-		fromAddr:    fromAddr,
-		fromPrivKey: fromPrivKey,
-		txConfig:    simapp.MakeTestEncodingConfig().TxConfig,
-		triggerTx:   triggerTxChan,
+		config:        config,
+		fromAddress:   fromAddress,
+		amount:        config.AmountSend,
+		denom:         config.Denom,
+		accountPrefix: config.Prefix,
+		grpcConn:      grpcConn,
+		triggerTx:     triggerTxChan,
+		pool: NewMessagePool(
+			WithTxSubmitter(
+				makeTxSubmitter(config, simapp.MakeTestEncodingConfig().TxConfig, grpcConn, fromPrivKey, fromAddress),
+			),
+		),
 	}, nil
 }
 
@@ -81,100 +78,100 @@ func (f *faucet) Start() {
 	go func() {
 		log.Info().Msg("Starting submit routine")
 		for range f.triggerTx {
-			msgCount := len(f.buffer)
+			msgCount := f.pool.Size()
+
 			resp, err := f.SubmitTx(context.Background())
 			if err != nil {
 				log.Err(err).Int("msgCount", msgCount).Msg("Could not submit transaction")
-				for _, txResponseChan := range f.txResponseChans {
-					close(txResponseChan)
-				}
-				f.txResponseChans = f.txResponseChans[:0]
 			} else if resp != nil {
 				log.Info().
 					Int("messageCount", msgCount).
 					Str("txHash", resp.TxHash).
 					Uint32("txCode", resp.Code).
 					Msg("Successfully submit transaction")
-				for _, txResponseChan := range f.txResponseChans {
-					txResponseChan <- resp
-					close(txResponseChan)
-				}
-				f.txResponseChans = f.txResponseChans[:0]
 			} else {
 				log.Info().Msg("No message to submit")
 			}
 		}
+
 		log.Info().Msg("Stopping submit routine")
 	}()
 }
 
+func (f *faucet) GetConfig() pkg.Config {
+	return f.config
+}
+
 func (f *faucet) SubmitTx(ctx context.Context) (*types.TxResponse, error) {
-	if len(f.buffer) == 0 {
-		return nil, nil
-	}
-
-	defer func() {
-		f.buffer = f.buffer[:0]
-	}()
-
-	txBuilder, err := cosmos.BuildUnsignedTx(f.config, f.txConfig, f.buffer)
-	if err != nil {
-		return nil, err
-	}
-
-	account, err := cosmos.GetAccount(ctx, f.grpcConn, f.fromAddr.String())
-	if err != nil {
-		return nil, err
-	}
-
-	signerData := signing.SignerData{
-		ChainID:       f.config.ChainID,
-		AccountNumber: account.GetAccountNumber(),
-		Sequence:      account.GetSequence(),
-	}
-
-	err = cosmos.SignTx(f.fromPrivKey, signerData, f.txConfig, txBuilder)
-	if err != nil {
-		return nil, err
-	}
-
-	txBytes, err := f.txConfig.TxEncoder()(txBuilder.GetTx())
-	if err != nil {
-		return nil, err
-	}
-
-	return cosmos.BroadcastTx(ctx, f.grpcConn, txBytes)
+	return f.pool.Submit()
 }
 
 func (f *faucet) Send(addr string) error {
-	toAddr, err := types.GetFromBech32(addr, f.config.Prefix)
+	msgSend, err := f.makeSendMsg(addr)
 	if err != nil {
 		return err
 	}
 
-	f.buffer = append(
-		f.buffer,
-		banktypes.NewMsgSend(
-			f.fromAddr,
-			toAddr,
-			types.NewCoins(types.NewInt64Coin(f.config.Denom, f.config.AmountSend)),
-		),
-	)
+	f.pool.RegisterMsg(msgSend)
 	return nil
 }
 
 func (f *faucet) Subscribe(addr string) (<-chan *types.TxResponse, error) {
-	if err := f.Send(addr); err != nil {
+	msgSend, err := f.makeSendMsg(addr)
+	if err != nil {
 		return nil, err
 	}
-	txResponseChan := make(chan *types.TxResponse)
-	f.txResponseChans = append(f.txResponseChans, txResponseChan)
 
-	return txResponseChan, nil
+	return f.pool.SubscribeMsg(msgSend), nil
 }
 
 func (f *faucet) Close() error {
 	return f.grpcConn.Close()
+}
+
+func (f *faucet) makeSendMsg(addr string) (types.Msg, error) {
+	toAddr, err := types.GetFromBech32(addr, f.accountPrefix)
+	if err != nil {
+		return nil, err
+	}
+
+	return banktypes.NewMsgSend(
+		f.fromAddress,
+		toAddr,
+		types.NewCoins(types.NewInt64Coin(f.denom, f.amount)),
+	), nil
+}
+
+func makeTxSubmitter(config pkg.Config, txConfig client.TxConfig, grpcConn *grpc.ClientConn, privKey crypto.PrivKey, addr types.AccAddress) TxSubmitter {
+	return func(msgs []types.Msg) (*types.TxResponse, error) {
+		txBuilder, err := cosmos.BuildUnsignedTx(config, txConfig, msgs)
+		if err != nil {
+			return nil, err
+		}
+
+		account, err := cosmos.GetAccount(context.Background(), grpcConn, addr.String())
+		if err != nil {
+			return nil, err
+		}
+
+		signerData := signing.SignerData{
+			ChainID:       config.ChainID,
+			AccountNumber: account.GetAccountNumber(),
+			Sequence:      account.GetSequence(),
+		}
+
+		err = cosmos.SignTx(privKey, signerData, txConfig, txBuilder)
+		if err != nil {
+			return nil, err
+		}
+
+		txBytes, err := txConfig.TxEncoder()(txBuilder.GetTx())
+		if err != nil {
+			return nil, err
+		}
+
+		return cosmos.BroadcastTx(context.Background(), grpcConn, txBytes)
+	}
 }
 
 func getTransportCredentials(config pkg.Config) credentials.TransportCredentials {

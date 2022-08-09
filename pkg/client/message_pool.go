@@ -11,13 +11,13 @@ import (
 type MessagePool struct {
 	mut           *sync.Mutex
 	submitterFunc TxSubmitter
-	msgs          []*types.Msg
+	msgs          []types.Msg
 	subscribers   []chan *types.TxResponse
 }
 
 // TxSubmitter shall implement all the logic to build, sign and submit a transaction containing all the messages of the
 // pool.
-type TxSubmitter func([]*types.Msg) (*types.TxResponse, error)
+type TxSubmitter func([]types.Msg) (*types.TxResponse, error)
 
 // MessagePoolOption allow to configure a MessagePool.
 type MessagePoolOption func(pool *MessagePool)
@@ -41,8 +41,12 @@ func WithTxSubmitter(submitterFunc TxSubmitter) MessagePoolOption {
 	}
 }
 
+func (pool *MessagePool) Size() int {
+	return len(pool.msgs)
+}
+
 // RegisterMsg atomically add the message in the pool.
-func (pool *MessagePool) RegisterMsg(msg *types.Msg) {
+func (pool *MessagePool) RegisterMsg(msg types.Msg) {
 	pool.lock()
 	defer pool.unlock()
 
@@ -51,7 +55,7 @@ func (pool *MessagePool) RegisterMsg(msg *types.Msg) {
 
 // SubscribeMsg atomically add the message in the pool, it also returns a channel on which will be sent the
 // corresponding transaction response, see Submit for more information on how the channel is managed.
-func (pool *MessagePool) SubscribeMsg(msg *types.Msg) <-chan *types.TxResponse {
+func (pool *MessagePool) SubscribeMsg(msg types.Msg) <-chan *types.TxResponse {
 	pool.lock()
 	defer pool.unlock()
 
@@ -71,7 +75,7 @@ func (pool *MessagePool) SubscribeMsg(msg *types.Msg) <-chan *types.TxResponse {
 //
 // Warning: To avoid locking the MessagePool, the channels are closed in separate routines which can lead to goroutine
 // leak if they are not consumed.
-func (pool *MessagePool) Submit() error {
+func (pool *MessagePool) Submit() (*types.TxResponse, error) {
 	pool.lock()
 	defer func() {
 		pool.flush()
@@ -80,14 +84,14 @@ func (pool *MessagePool) Submit() error {
 
 	resp, err := pool.submitterFunc(pool.msgs)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, subscriber := range pool.subscribers {
 		subscriber <- resp
 	}
 
-	return nil
+	return resp, nil
 }
 
 func (pool *MessagePool) lock() {
