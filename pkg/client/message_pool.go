@@ -9,10 +9,10 @@ import (
 // MessagePool atomically manage a pool of messages waiting to be sent through a transaction. It also allows to
 // subscribe to the transaction response once submitted to receive it through a channel.
 type MessagePool struct {
-	mut         *sync.Mutex
-	txFunc      TxSubmitter
-	msgs        []*types.Msg
-	subscribers []chan *types.TxResponse
+	mut           *sync.Mutex
+	submitterFunc TxSubmitter
+	msgs          []*types.Msg
+	subscribers   []chan *types.TxResponse
 }
 
 // TxSubmitter shall implement all the logic to build, sign and submit a transaction containing all the messages of the
@@ -33,6 +33,12 @@ func NewMessagePool(opts ...MessagePoolOption) *MessagePool {
 	}
 
 	return pool
+}
+
+func WithTxSubmitter(submitterFunc TxSubmitter) MessagePoolOption {
+	return func(pool *MessagePool) {
+		pool.submitterFunc = submitterFunc
+	}
 }
 
 // RegisterMsg atomically add the message in the pool.
@@ -72,7 +78,7 @@ func (pool *MessagePool) Submit() error {
 		pool.unlock()
 	}()
 
-	resp, err := pool.txFunc(pool.msgs)
+	resp, err := pool.submitterFunc(pool.msgs)
 	if err != nil {
 		return err
 	}
