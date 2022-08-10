@@ -19,27 +19,15 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type Faucet interface {
-	Start()
-	GetConfig() pkg.Config
-	SubmitTx(ctx context.Context) (*types.TxResponse, error)
-	Send(addr string) error
-	Subscribe(addr string) (<-chan *types.TxResponse, error)
-	Close() error
+type Faucet struct {
+	config      pkg.Config
+	fromAddress types.AccAddress
+	grpcConn    *grpc.ClientConn
+	triggerTx   <-chan bool
+	pool        *MessagePool
 }
 
-type faucet struct {
-	config        pkg.Config
-	fromAddress   types.AccAddress
-	amount        int64
-	denom         string
-	accountPrefix string
-	grpcConn      *grpc.ClientConn
-	triggerTx     <-chan bool
-	pool          *MessagePool
-}
-
-func NewFaucet(config pkg.Config, triggerTxChan <-chan bool) (Faucet, error) {
+func NewFaucet(config pkg.Config, triggerTxChan <-chan bool) (*Faucet, error) {
 	conf := types.GetConfig()
 	conf.SetBech32PrefixForAccount(config.Prefix, config.Prefix)
 
@@ -58,29 +46,29 @@ func NewFaucet(config pkg.Config, triggerTxChan <-chan bool) (Faucet, error) {
 
 	fromAddress := types.AccAddress(fromPrivKey.PubKey().Address())
 
-	return &faucet{
-		config:        config,
-		fromAddress:   fromAddress,
-		amount:        config.AmountSend,
-		denom:         config.Denom,
-		accountPrefix: config.Prefix,
-		grpcConn:      grpcConn,
-		triggerTx:     triggerTxChan,
+	faucet := &Faucet{
+		config:      config,
+		fromAddress: fromAddress,
+		grpcConn:    grpcConn,
+		triggerTx:   triggerTxChan,
 		pool: NewMessagePool(
 			WithTxSubmitter(
 				makeTxSubmitter(config, simapp.MakeTestEncodingConfig().TxConfig, grpcConn, fromPrivKey, fromAddress),
 			),
 		),
-	}, nil
+	}
+
+	faucet.start()
+	return faucet, nil
 }
 
-func (f *faucet) Start() {
+func (f *Faucet) start() {
 	go func() {
 		log.Info().Msg("Starting submit routine")
 		for range f.triggerTx {
 			msgCount := f.pool.Size()
 
-			resp, err := f.SubmitTx(context.Background())
+			resp, err := f.pool.Submit()
 			if err != nil {
 				log.Err(err).Int("msgCount", msgCount).Msg("Could not submit transaction")
 			} else if resp != nil {
@@ -106,15 +94,11 @@ func (f *faucet) Start() {
 	}()
 }
 
-func (f *faucet) GetConfig() pkg.Config {
+func (f *Faucet) GetConfig() pkg.Config {
 	return f.config
 }
 
-func (f *faucet) SubmitTx(ctx context.Context) (*types.TxResponse, error) {
-	return f.pool.Submit()
-}
-
-func (f *faucet) Send(addr string) error {
+func (f *Faucet) Send(addr string) error {
 	msgSend, err := f.makeSendMsg(addr)
 	if err != nil {
 		return err
@@ -124,7 +108,7 @@ func (f *faucet) Send(addr string) error {
 	return nil
 }
 
-func (f *faucet) Subscribe(addr string) (<-chan *types.TxResponse, error) {
+func (f *Faucet) Subscribe(addr string) (<-chan *types.TxResponse, error) {
 	msgSend, err := f.makeSendMsg(addr)
 	if err != nil {
 		return nil, err
@@ -133,12 +117,12 @@ func (f *faucet) Subscribe(addr string) (<-chan *types.TxResponse, error) {
 	return f.pool.SubscribeMsg(msgSend), nil
 }
 
-func (f *faucet) Close() error {
+func (f *Faucet) Close() error {
 	return f.grpcConn.Close()
 }
 
-func (f *faucet) makeSendMsg(addr string) (types.Msg, error) {
-	toAddr, err := types.GetFromBech32(addr, f.accountPrefix)
+func (f *Faucet) makeSendMsg(addr string) (types.Msg, error) {
+	toAddr, err := types.GetFromBech32(addr, f.config.Prefix)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +130,7 @@ func (f *faucet) makeSendMsg(addr string) (types.Msg, error) {
 	return banktypes.NewMsgSend(
 		f.fromAddress,
 		toAddr,
-		types.NewCoins(types.NewInt64Coin(f.denom, f.amount)),
+		types.NewCoins(types.NewInt64Coin(f.config.Denom, f.config.AmountSend)),
 	), nil
 }
 

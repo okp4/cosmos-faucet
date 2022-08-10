@@ -13,7 +13,7 @@ import (
 type Config struct {
 	EnableMetrics bool `mapstructure:"metrics"`
 	EnableHealth  bool `mapstructure:"health"`
-	Faucet        client.Faucet
+	Faucet        *client.Faucet
 	CaptchaConf   captcha.ResolverConfig
 }
 
