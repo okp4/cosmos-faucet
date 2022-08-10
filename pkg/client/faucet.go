@@ -99,14 +99,14 @@ func NewFaucet(config pkg.Config, triggerTxChan <-chan *TriggerTx) (*Faucet, err
 
 func (f *Faucet) start() {
 	go func() {
-		log.Info().Msg("Starting submit routine")
+		log.Info().Msg("🏃 Starting submit routine")
 		for trigger := range f.triggerTx {
 			if trigger.Deadline.After(time.Now()) {
 				f.handleTriggerTx(trigger)
 			}
 		}
 
-		log.Info().Msg("Stopping submit routine")
+		log.Info().Msg("🏁 Stopping submit routine")
 	}()
 }
 
@@ -117,23 +117,23 @@ func (f *Faucet) handleTriggerTx(trigger *TriggerTx) {
 	msgCount := f.pool.Size()
 	resp, err := f.pool.Submit(ctx)
 	if err != nil {
-		log.Err(err).Int("msgCount", msgCount).Msg("Could not submit transaction")
+		log.Err(err).Int("msgCount", msgCount).Msg("❌ Could not submit transaction")
 	} else if resp != nil {
 		if resp.Code != 0 {
 			log.Warn().
 				Int("messageCount", msgCount).
 				Interface("tx", resp).
-				Msg("Transaction submitted with non 0 code")
+				Msg("😞 Transaction submitted with non 0 code")
 
 		} else {
 			log.Info().
 				Int("messageCount", msgCount).
 				Str("txHash", resp.TxHash).
 				Uint32("txCode", resp.Code).
-				Msg("Successfully submit transaction")
+				Msg("🚀 Successfully submit transaction")
 		}
 	} else {
-		log.Info().Msg("No message to submit")
+		log.Info().Msg("😥 No message to submit")
 	}
 }
 
