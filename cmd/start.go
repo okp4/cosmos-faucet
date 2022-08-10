@@ -11,6 +11,7 @@ import (
 
 const (
 	FlagAddress       = "address"
+	FlagBatchWindow   = "batch-window"
 	FlagMetrics       = "metrics"
 	FlagHealth        = "health"
 	FlagCaptchaSecret = "captcha-secret"
@@ -24,6 +25,7 @@ var serverConfig server.Config
 // NewStartCommand returns a CLI command to start the REST api allowing to send tokens.
 func NewStartCommand() *cobra.Command {
 	var addr string
+	var batchWindow time.Duration
 
 	startCmd := &cobra.Command{
 		Use:   "start",
@@ -31,7 +33,7 @@ func NewStartCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			triggerTxChan := make(chan *client.TriggerTx)
 			go func() {
-				for range time.Tick(5 * time.Second) {
+				for range time.Tick(batchWindow) {
 					triggerTxChan <- client.MakeTriggerTx(client.WithDeadline(time.Now().Add(config.TxTimeout)))
 				}
 			}()
@@ -52,6 +54,12 @@ func NewStartCommand() *cobra.Command {
 	}
 
 	startCmd.Flags().StringVar(&addr, FlagAddress, ":8080", "graphql api address")
+	startCmd.Flags().DurationVar(
+		&batchWindow,
+		FlagBatchWindow,
+		8*time.Second,
+		"Batch temporal window, can be seen a the minimum duration between too transactions.",
+	)
 	startCmd.Flags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "enable metrics endpoint")
 	startCmd.Flags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "enable health endpoint")
 	startCmd.Flags().BoolVar(
