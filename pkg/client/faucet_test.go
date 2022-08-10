@@ -23,22 +23,18 @@ func TestNewFaucet(t *testing.T) {
 		}
 
 		Convey("When creating the faucet service", func() {
-			svc, err := NewFaucet(config)
+			svc, err := NewFaucet(config, nil)
 
 			Convey("Then the faucet should be successfully created with the provided configuration", func() {
 				So(svc, ShouldNotBeNil)
 				So(err, ShouldBeNil)
 
 				So(svc.GetConfig(), ShouldResemble, config)
-				So(svc.GetFromAddr().String(), ShouldEqual, "okp412wc7ts3fwaxkc7azjal0wsd434m0kwxr3c0aqn")
+				So(svc.fromAddress.String(), ShouldEqual, "okp412wc7ts3fwaxkc7azjal0wsd434m0kwxr3c0aqn")
 			})
 
 			Convey("And the GRPC connection should target the expected address", func() {
-				So(svc.(*faucet).grpcConn.Target(), ShouldEqual, grpcAddre)
-			})
-
-			Convey("And the private key should equal the expected byte sequence", func() {
-				So(svc.(*faucet).fromPrivKey.Bytes(), ShouldResemble, []byte{65, 73, 9, 173, 188, 203, 234, 54, 252, 7, 215, 139, 14, 198, 158, 151, 173, 0, 14, 41, 35, 110, 154, 38, 116, 168, 164, 167, 140, 151, 67, 113})
+				So(svc.grpcConn.Target(), ShouldEqual, grpcAddre)
 			})
 		})
 	})
@@ -52,7 +48,7 @@ func TestNewFaucet(t *testing.T) {
 		}
 
 		Convey("When creating the faucet service", func() {
-			faucet, err := NewFaucet(config)
+			faucet, err := NewFaucet(config, nil)
 
 			Convey("Then the faucet creation should fail", func() {
 				So(faucet, ShouldBeNil)

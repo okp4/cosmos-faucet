@@ -28,11 +28,9 @@ func TestBuildUnsignedTx(t *testing.T) {
 			Memo:       "memo",
 			GasLimit:   2000,
 		}
-		fromAddr := types.AccAddress("okp4AAAAA")
-		toAddr := types.AccAddress("okp4BBB")
 
 		Convey("When building an unsigned transaction", func() {
-			unsignedTx, err := BuildUnsignedTx(config, newTxConfig(), fromAddr, toAddr)
+			unsignedTx, err := BuildUnsignedTx(config, newTxConfig(), nil)
 
 			Convey("Then the transaction should be successfully built", func() {
 				So(err, ShouldBeNil)
@@ -61,8 +59,6 @@ func TestSignTx(t *testing.T) {
 			Memo:       "memo",
 			GasLimit:   2000,
 		}
-		fromAddr := types.AccAddress("okp4AAAAA")
-		toAddr := types.AccAddress("okp4BBB")
 
 		Convey("When signing the transaction", func() {
 			signerData := signing.SignerData{
@@ -70,7 +66,7 @@ func TestSignTx(t *testing.T) {
 				AccountNumber: 10,
 				Sequence:      54,
 			}
-			tx, _ := BuildUnsignedTx(config, newTxConfig(), fromAddr, toAddr)
+			tx, _ := BuildUnsignedTx(config, newTxConfig(), nil)
 			err := SignTx(privKey, signerData, newTxConfig(), tx)
 
 			Convey("Then the transaction should be signed", func() {
