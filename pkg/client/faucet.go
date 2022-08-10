@@ -116,15 +116,15 @@ func (f *Faucet) handleTriggerTx(trigger *TriggerTx) {
 
 	msgCount := f.pool.Size()
 	resp, err := f.pool.Submit(ctx)
-	if err != nil {
+	switch {
+	case err != nil:
 		log.Err(err).Int("msgCount", msgCount).Msg("❌ Could not submit transaction")
-	} else if resp != nil {
+	case resp != nil:
 		if resp.Code != 0 {
 			log.Warn().
 				Int("messageCount", msgCount).
 				Interface("tx", resp).
 				Msg("😞 Transaction submitted with non 0 code")
-
 		} else {
 			log.Info().
 				Int("messageCount", msgCount).
@@ -132,7 +132,7 @@ func (f *Faucet) handleTriggerTx(trigger *TriggerTx) {
 				Uint32("txCode", resp.Code).
 				Msg("🚀 Successfully submit transaction")
 		}
-	} else {
+	default:
 		log.Info().Msg("😥 No message to submit")
 	}
 }
@@ -177,7 +177,13 @@ func (f *Faucet) makeSendMsg(addr string) (types.Msg, error) {
 	), nil
 }
 
-func makeTxSubmitter(config pkg.Config, txConfig client.TxConfig, grpcConn *grpc.ClientConn, privKey crypto.PrivKey, addr types.AccAddress) TxSubmitter {
+func makeTxSubmitter(
+	config pkg.Config,
+	txConfig client.TxConfig,
+	grpcConn *grpc.ClientConn,
+	privKey crypto.PrivKey,
+	addr types.AccAddress,
+) TxSubmitter {
 	return func(ctx context.Context, msgs []types.Msg) (*types.TxResponse, error) {
 		txBuilder, err := cosmos.BuildUnsignedTx(config, txConfig, msgs)
 		if err != nil {

@@ -23,6 +23,7 @@ const (
 var serverConfig server.Config
 
 // NewStartCommand returns a CLI command to start the REST api allowing to send tokens.
+// nolint: funlen
 func NewStartCommand() *cobra.Command {
 	var addr string
 	var batchWindow time.Duration

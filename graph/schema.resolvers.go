@@ -12,18 +12,18 @@ import (
 )
 
 // Send is the resolver for the send field.
-func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*string, error) {
-	if err := r.CaptchaResolver.CheckRecaptcha(ctx, input.CaptchaToken); err != nil {
-		return nil, err
+func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (void *string, err error) {
+	if err = r.CaptchaResolver.CheckRecaptcha(ctx, input.CaptchaToken); err != nil {
+		return
 	}
 
-	if err := r.Faucet.Send(input.ToAddress); err != nil {
+	if err = r.Faucet.Send(input.ToAddress); err != nil {
 		log.Err(err).Str("toAddress", input.ToAddress).Msg("Could not register send request")
-		return nil, err
+		return
 	}
 
 	log.Info().Str("toAddress", input.ToAddress).Msg("Register send request")
-	return nil, nil
+	return
 }
 
 // Configuration is the resolver for the configuration field.
