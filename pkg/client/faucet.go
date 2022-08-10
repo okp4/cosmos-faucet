@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"crypto/tls"
+	"time"
 
 	"okp4/cosmos-faucet/pkg"
 	"okp4/cosmos-faucet/pkg/cosmos"
@@ -19,15 +20,49 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+// TriggerTx is the message sent to the faucet to trigger a transaction submit, it conveys parameters related to the
+// ongoing transaction.
+type TriggerTx struct {
+	// Deadline specify a time which the transaction execute shall not exceed.
+	Deadline *time.Time
+}
+
+// TriggerTxOption is used to configure a TriggerTx.
+type TriggerTxOption func(msg *TriggerTx)
+
+// MakeTriggerTx create a new TriggerTx configured through the provided options.
+func MakeTriggerTx(opts ...TriggerTxOption) *TriggerTx {
+	msg := &TriggerTx{}
+	for _, opt := range opts {
+		opt(msg)
+	}
+
+	return msg
+}
+
+// WithDeadline configure a deadline on a TriggerTx.
+func WithDeadline(deadline time.Time) TriggerTxOption {
+	return func(msg *TriggerTx) {
+		msg.Deadline = &deadline
+	}
+}
+
+func (trigger TriggerTx) toCtx() (context.Context, context.CancelFunc) {
+	if trigger.Deadline != nil {
+		return context.WithDeadline(context.Background(), *trigger.Deadline)
+	}
+	return context.Background(), nil
+}
+
 type Faucet struct {
 	config      pkg.Config
 	fromAddress types.AccAddress
 	grpcConn    *grpc.ClientConn
-	triggerTx   <-chan bool
+	triggerTx   <-chan *TriggerTx
 	pool        *MessagePool
 }
 
-func NewFaucet(config pkg.Config, triggerTxChan <-chan bool) (*Faucet, error) {
+func NewFaucet(config pkg.Config, triggerTxChan <-chan *TriggerTx) (*Faucet, error) {
 	conf := types.GetConfig()
 	conf.SetBech32PrefixForAccount(config.Prefix, config.Prefix)
 
@@ -65,33 +100,41 @@ func NewFaucet(config pkg.Config, triggerTxChan <-chan bool) (*Faucet, error) {
 func (f *Faucet) start() {
 	go func() {
 		log.Info().Msg("Starting submit routine")
-		for range f.triggerTx {
-			msgCount := f.pool.Size()
-
-			resp, err := f.pool.Submit()
-			if err != nil {
-				log.Err(err).Int("msgCount", msgCount).Msg("Could not submit transaction")
-			} else if resp != nil {
-				if resp.Code != 0 {
-					log.Warn().
-						Int("messageCount", msgCount).
-						Interface("tx", resp).
-						Msg("Transaction submitted with non 0 code")
-
-				} else {
-					log.Info().
-						Int("messageCount", msgCount).
-						Str("txHash", resp.TxHash).
-						Uint32("txCode", resp.Code).
-						Msg("Successfully submit transaction")
-				}
-			} else {
-				log.Info().Msg("No message to submit")
+		for trigger := range f.triggerTx {
+			if trigger.Deadline.After(time.Now()) {
+				f.handleTriggerTx(trigger)
 			}
 		}
 
 		log.Info().Msg("Stopping submit routine")
 	}()
+}
+
+func (f *Faucet) handleTriggerTx(trigger *TriggerTx) {
+	ctx, cancelFunc := trigger.toCtx()
+	defer cancelFunc()
+
+	msgCount := f.pool.Size()
+	resp, err := f.pool.Submit(ctx)
+	if err != nil {
+		log.Err(err).Int("msgCount", msgCount).Msg("Could not submit transaction")
+	} else if resp != nil {
+		if resp.Code != 0 {
+			log.Warn().
+				Int("messageCount", msgCount).
+				Interface("tx", resp).
+				Msg("Transaction submitted with non 0 code")
+
+		} else {
+			log.Info().
+				Int("messageCount", msgCount).
+				Str("txHash", resp.TxHash).
+				Uint32("txCode", resp.Code).
+				Msg("Successfully submit transaction")
+		}
+	} else {
+		log.Info().Msg("No message to submit")
+	}
 }
 
 func (f *Faucet) GetConfig() pkg.Config {
@@ -135,13 +178,13 @@ func (f *Faucet) makeSendMsg(addr string) (types.Msg, error) {
 }
 
 func makeTxSubmitter(config pkg.Config, txConfig client.TxConfig, grpcConn *grpc.ClientConn, privKey crypto.PrivKey, addr types.AccAddress) TxSubmitter {
-	return func(msgs []types.Msg) (*types.TxResponse, error) {
+	return func(ctx context.Context, msgs []types.Msg) (*types.TxResponse, error) {
 		txBuilder, err := cosmos.BuildUnsignedTx(config, txConfig, msgs)
 		if err != nil {
 			return nil, err
 		}
 
-		account, err := cosmos.GetAccount(context.Background(), grpcConn, addr.String())
+		account, err := cosmos.GetAccount(ctx, grpcConn, addr.String())
 		if err != nil {
 			return nil, err
 		}
@@ -162,7 +205,7 @@ func makeTxSubmitter(config pkg.Config, txConfig client.TxConfig, grpcConn *grpc
 			return nil, err
 		}
 
-		return cosmos.BroadcastTx(context.Background(), grpcConn, txBytes)
+		return cosmos.BroadcastTx(ctx, grpcConn, txBytes)
 	}
 }
 

@@ -29,10 +29,10 @@ func NewStartCommand() *cobra.Command {
 		Use:   "start",
 		Short: "Start the GraphQL api",
 		Run: func(cmd *cobra.Command, args []string) {
-			triggerTxChan := make(chan bool)
+			triggerTxChan := make(chan *client.TriggerTx)
 			go func() {
 				for range time.Tick(5 * time.Second) {
-					triggerTxChan <- true
+					triggerTxChan <- client.MakeTriggerTx(client.WithDeadline(time.Now().Add(5 * time.Second)))
 				}
 			}()
 

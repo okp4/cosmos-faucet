@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"sync"
 
 	"github.com/cosmos/cosmos-sdk/types"
@@ -17,7 +18,7 @@ type MessagePool struct {
 
 // TxSubmitter shall implement all the logic to build, sign and submit a transaction containing all the messages of the
 // pool.
-type TxSubmitter func([]types.Msg) (*types.TxResponse, error)
+type TxSubmitter func(context.Context, []types.Msg) (*types.TxResponse, error)
 
 // MessagePoolOption allow to configure a MessagePool.
 type MessagePoolOption func(pool *MessagePool)
@@ -77,7 +78,7 @@ func (pool *MessagePool) SubscribeMsg(msg types.Msg) <-chan *types.TxResponse {
 //
 // Warning: To avoid locking the MessagePool, the channels are closed in a separate routine which can lead to goroutine
 // leak if they are not consumed.
-func (pool *MessagePool) Submit() (*types.TxResponse, error) {
+func (pool *MessagePool) Submit(ctx context.Context) (*types.TxResponse, error) {
 	pool.lock()
 	defer func() {
 		pool.flush()
@@ -88,7 +89,7 @@ func (pool *MessagePool) Submit() (*types.TxResponse, error) {
 		return nil, nil
 	}
 
-	resp, err := pool.submitterFunc(pool.msgs)
+	resp, err := pool.submitterFunc(ctx, pool.msgs)
 	if err != nil {
 		return nil, err
 	}
