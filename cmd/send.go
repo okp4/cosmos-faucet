@@ -28,7 +28,7 @@ func NewSendCommand() *cobra.Command {
 				return err
 			}
 
-			send <- client.MakeTriggerTx(client.WithDeadline(time.Now().Add(5 * time.Second)))
+			send <- client.MakeTriggerTx(client.WithDeadline(time.Now().Add(config.TxTimeout)))
 
 			return err
 		},

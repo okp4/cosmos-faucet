@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"okp4/cosmos-faucet/pkg"
 
@@ -50,6 +51,7 @@ func Execute() {
 		FlagTLSSkipVerify,
 		false,
 		"Encryption with the GRPC endpoint but skip certificates verification")
+	rootCmd.PersistentFlags().DurationVar(&config.TxTimeout, FlagTxTimeout, 5*time.Second, "Transaction timeout")
 
 	err := rootCmd.Execute()
 	if err != nil {

@@ -32,7 +32,7 @@ func NewStartCommand() *cobra.Command {
 			triggerTxChan := make(chan *client.TriggerTx)
 			go func() {
 				for range time.Tick(5 * time.Second) {
-					triggerTxChan <- client.MakeTriggerTx(client.WithDeadline(time.Now().Add(5 * time.Second)))
+					triggerTxChan <- client.MakeTriggerTx(client.WithDeadline(time.Now().Add(config.TxTimeout)))
 				}
 			}()
 
