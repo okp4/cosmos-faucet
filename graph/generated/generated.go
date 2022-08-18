@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 	"okp4/cosmos-faucet/graph/model"
-	"okp4/cosmos-faucet/pkg"
+	"okp4/cosmos-faucet/graph/scalar"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -3712,12 +3712,12 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 // region    ***************************** type.gotpl *****************************
 
 func (ec *executionContext) unmarshalNAddress2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := pkg.UnmarshalAddress(v)
+	res, err := scalar.UnmarshalAddress(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNAddress2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := pkg.MarshalAddress(v)
+	res := scalar.MarshalAddress(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3820,12 +3820,12 @@ func (ec *executionContext) marshalNTxResponse2ᚖokp4ᚋcosmosᚑfaucetᚋgraph
 }
 
 func (ec *executionContext) unmarshalNUInt642uint64(ctx context.Context, v interface{}) (uint64, error) {
-	res, err := pkg.UnmarshalUInt64(v)
+	res, err := scalar.UnmarshalUInt64(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNUInt642uint64(ctx context.Context, sel ast.SelectionSet, v uint64) graphql.Marshaler {
-	res := pkg.MarshalUInt64(v)
+	res := scalar.MarshalUInt64(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")

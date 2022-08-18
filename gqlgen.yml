@@ -50,10 +50,10 @@ models:
       - github.com/99designs/gqlgen/graphql.Int32
   UInt64:
     model:
-      - okp4/cosmos-faucet/pkg.UInt64
+      - okp4/cosmos-faucet/graph/scalar.UInt64
   Long:
     model:
       - github.com/99designs/gqlgen/graphql.Int64
   Address:
     model:
-      - okp4/cosmos-faucet/pkg.Address
+      - okp4/cosmos-faucet/graph/scalar.Address

@@ -15,20 +15,20 @@ import (
 )
 
 // Send is the resolver for the send field.
-func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (void *string, err error) {
+func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*string, error) {
 	addr, err := types.GetFromBech32(input.ToAddress, r.AddressPrefix)
 	if err != nil {
 		log.Err(err).Str("toAddress", input.ToAddress).Msg("❌ Could not serve send mutation")
-		return
+		return nil, err
 	}
 
 	if err = r.CaptchaResolver.CheckRecaptcha(ctx, input.CaptchaToken); err != nil {
 		log.Err(err).Str("toAddress", input.ToAddress).Msg("❌ Could not serve send mutation")
-		return
+		return nil, err
 	}
 
 	r.Context.Send(r.Faucet, message.RequestFunds{Address: addr})
-	return
+	return nil, nil
 }
 
 // Configuration is the resolver for the configuration field.
