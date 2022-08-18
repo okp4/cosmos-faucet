@@ -50,7 +50,7 @@ func TestBuildUnsignedTx(t *testing.T) {
 
 func TestSignTx(t *testing.T) {
 	Convey("Given a private key, account and message", t, func() {
-		privKey := must.Must(GeneratePrivateKey("nasty random alter chronic become keen stadium test chaos fashion during claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard"))
+		privKey := must.Must(ParseMnemonic("nasty random alter chronic become keen stadium test chaos fashion during claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard"))
 		config := pkg.Config{
 			Denom:      "know",
 			Prefix:     "okp4",
@@ -93,7 +93,7 @@ func TestGeneratePrivateKey(t *testing.T) {
 		mnemonic := "nasty random alter chronic become keen stadium test chaos fashion during claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard"
 
 		Convey("When generating its corresponding private key", func() {
-			privKey, err := GeneratePrivateKey(mnemonic)
+			privKey, err := ParseMnemonic(mnemonic)
 
 			Convey("Then The private key have been successfully decoded", func() {
 				So(privKey, ShouldNotBeNil)
@@ -106,7 +106,7 @@ func TestGeneratePrivateKey(t *testing.T) {
 		mnemonic := "nasty random alter chronic become keen stadium test chaos fashion durin claim rug thing trade swap bleak shuffle bronze gun tobacco length aim hazard"
 
 		Convey("When generating its corresponding private key", func() {
-			privKey, err := GeneratePrivateKey(mnemonic)
+			privKey, err := ParseMnemonic(mnemonic)
 
 			Convey("Then the private key shall not be decoded", func() {
 				So(privKey, ShouldBeNil)
