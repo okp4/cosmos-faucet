@@ -1,8 +1,10 @@
 package graph
 
 import (
+	"okp4/cosmos-faucet/graph/model"
 	"okp4/cosmos-faucet/pkg/captcha"
-	"okp4/cosmos-faucet/pkg/client"
+
+	"github.com/asynkron/protoactor-go/actor"
 )
 
 // This file will not be regenerated automatically.
@@ -10,6 +12,9 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Faucet          *client.Faucet
+	Faucet          *actor.PID
+	Context         *actor.RootContext
+	AddressPrefix   string
 	CaptchaResolver captcha.Resolver
+	Config          *model.Configuration
 }
