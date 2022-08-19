@@ -4,14 +4,12 @@ import (
 	"okp4/cosmos-faucet/graph"
 	"okp4/cosmos-faucet/graph/model"
 	"okp4/cosmos-faucet/internal/server"
+	"okp4/cosmos-faucet/pkg/actor/bootstrap"
 	"okp4/cosmos-faucet/pkg/actor/message"
 	"okp4/cosmos-faucet/pkg/captcha"
 	"okp4/cosmos-faucet/pkg/cosmos"
-	"okp4/cosmos-faucet/pkg/faucet"
 	"time"
 
-	"github.com/asynkron/protoactor-go/actor"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -49,33 +47,13 @@ func NewStartCommand() *cobra.Command {
 				log.Panic().Err(err).Msg("❌ Could not parse mnemonic")
 			}
 
-			cosmosClientProps := actor.PropsFromProducer(func() actor.Actor {
-				grpcClient, err := cosmos.NewGrpcClient(grpcAddress, getTransportCredentials())
-				if err != nil {
-					log.Panic().Err(err).Msg("❌ Could not create grpc client")
-				}
-
-				return grpcClient
-			})
-
-			txHandlerProps := actor.PropsFromProducer(func() actor.Actor {
-				return cosmos.NewTxHandler(
-					cosmos.WithChainID(chainID),
-					cosmos.WithPrivateKey(privKey),
-					cosmos.WithTxConfig(simapp.MakeTestEncodingConfig().TxConfig),
-					cosmos.WithCosmosClientProps(cosmosClientProps),
-				)
-			})
-
-			actorCTX := actor.NewActorSystem().Root
-			faucetPID := actorCTX.Spawn(actor.PropsFromProducer(func() actor.Actor {
-				return faucet.NewFaucet(
-					faucet.WithChainID(chainID),
-					faucet.WithAmount(types.NewCoins(types.NewInt64Coin(denom, amountSend))),
-					faucet.WithAddress(types.AccAddress(privKey.PubKey().Address())),
-					faucet.WithTxHandlerProps(txHandlerProps),
-				)
-			}))
+			actorCTX, faucetPID := bootstrap.BootstrapActors(
+				chainID,
+				privKey,
+				types.NewCoins(types.NewInt64Coin(denom, amountSend)),
+				grpcAddress,
+				getTransportCredentials(),
+			)
 
 			graphqlResolver := &graph.Resolver{
 				Faucet:          faucetPID,
