@@ -13,7 +13,7 @@ import (
 type Config struct {
 	EnableMetrics bool `mapstructure:"metrics"`
 	EnableHealth  bool `mapstructure:"health"`
-	Faucet        client.Faucet
+	Faucet        *client.Faucet
 	CaptchaConf   captcha.ResolverConfig
 }
 
@@ -37,6 +37,6 @@ func NewServer(config Config) HTTPServer {
 
 // Start starts the http server on specified address.
 func (s httpServer) Start(address string) {
-	log.Info().Msgf("Server listening at %s", address)
+	log.Info().Msgf("\U0001F9BB Server listening at %s", address)
 	log.Fatal().Err(http.ListenAndServe(address, s.router)).Msg("Server listening stopped")
 }

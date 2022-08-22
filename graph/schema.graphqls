@@ -10,6 +10,9 @@ scalar Long
 """An unsigned 64-bit integer"""
 scalar UInt64
 
+"""Represent a void return type, representing no value"""
+scalar Void
+
 """All inputs needed to send token to a given address"""
 input SendInput {
     """Captcha token"""
@@ -35,12 +38,29 @@ type TxResponse {
     rawLog: String
 }
 
+"""List of all subscriptions"""
+type Subscription {
+    """
+    Send the configured amount of token to the given address.
+
+    By opening the subscription the send message is added to a queue, once the transaction is successfully submitted
+    with all the queued messages it'll return the corresponding before closing the stream. A successful submission does
+    not mean it has been successfully written in a block, it is the client's responsibility to make additional checks
+    through the transaction's code and hash.
+    """
+    send(input: SendInput!): TxResponse!
+}
+
 """List of all mutations"""
 type Mutation {
     """
-    Send the configured amount of token to the given address.
+    Send the configured amount of token to the given address, returning nothing as the transaction is made
+    asynchronously. A successful invocation means that the send operation is queued and will be processed, but it'll
+    does not necessary lead to a successful transaction.
+
+    For clients needing information on the underlying transaction state, consider using the `send` subscription.
     """
-    send(input: SendInput!): TxResponse!
+    send(input: SendInput!): Void
 }
 
 """Represent the actual server configuration"""

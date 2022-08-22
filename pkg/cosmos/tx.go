@@ -10,15 +10,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
-func BuildUnsignedTx(config pkg.Config, txConfig sdk.TxConfig, fromAddr, toAddr types.AccAddress) (sdk.TxBuilder, error) {
-	msg := bank.NewMsgSend(fromAddr, toAddr, types.NewCoins(types.NewInt64Coin(config.Denom, config.AmountSend)))
-
+func BuildUnsignedTx(config pkg.Config, txConfig sdk.TxConfig, msgs []types.Msg) (sdk.TxBuilder, error) {
 	txBuilder := txConfig.NewTxBuilder()
 
-	err := txBuilder.SetMsgs(msg)
+	err := txBuilder.SetMsgs(msgs...)
 	if err != nil {
 		return nil, err
 	}

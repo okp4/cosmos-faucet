@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"context"
-
 	"okp4/cosmos-faucet/pkg/client"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -15,16 +14,21 @@ func NewSendCommand() *cobra.Command {
 		Short: "Send tokens to a given address",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			faucet, err := client.NewFaucet(config)
+			send := make(chan *client.TriggerTx)
+			faucet, err := client.NewFaucet(config, send)
 			if err != nil {
 				return err
 			}
 
-			defer func(faucet client.Faucet) {
+			defer func(faucet *client.Faucet) {
 				_ = faucet.Close()
 			}(faucet)
 
-			_, err = faucet.SendTxMsg(context.Background(), args[0])
+			if err := faucet.Send(args[0]); err != nil {
+				return err
+			}
+
+			send <- client.MakeTriggerTx(client.WithDeadline(time.Now().Add(config.TxTimeout)))
 
 			return err
 		},

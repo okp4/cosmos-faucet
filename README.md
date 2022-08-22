@@ -60,10 +60,11 @@ Global Flags:
       --gas-limit uint        Gas limit (default 200000)
       --grpc-address string   The grpc okp4 server url (default "127.0.0.1:9090")
       --memo string           The memo description (default "Sent by økp4 faucet")
-      --mnemonic string       
+      --mnemonic string
       --no-tls                No encryption with the GRPC endpoint
       --prefix string         Address prefix (default "okp4")
       --tls-skip-verify       Encryption with the GRPC endpoint but skip certificates verification
+      --tx-timeout duration   Transaction timeout (default 5s)
 ```
 
 #### Start
@@ -76,6 +77,7 @@ Usage:
 
 Flags:
       --address string              graphql api address (default ":8080")
+      --batch-window duration       Batch temporal window, can be seen a the minimum duration between too transactions. (default 8s)
       --captcha                     enable captcha verification
       --captcha-min-score float     set Captcha min score (default 0.5)
       --captcha-secret string       set Captcha secret
@@ -92,15 +94,16 @@ Global Flags:
       --gas-limit uint        Gas limit (default 200000)
       --grpc-address string   The grpc okp4 server url (default "127.0.0.1:9090")
       --memo string           The memo description (default "Sent by økp4 faucet")
-      --mnemonic string       
+      --mnemonic string
       --no-tls                No encryption with the GRPC endpoint
       --prefix string         Address prefix (default "okp4")
       --tls-skip-verify       Encryption with the GRPC endpoint but skip certificates verification
+      --tx-timeout duration   Transaction timeout (default 5s)
 ```
 
 ### GraphQL
 
-Start GraphQL server with captcha verification for the send token mutation.
+Start GraphQL server with captcha verification for the send token mutation and subscription.
 
 ```shell
 cosmos-faucet start --captcha --captcha-secret $CAPCTHA_SECRET

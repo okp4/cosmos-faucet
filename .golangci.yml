@@ -40,7 +40,6 @@ linters:
     - nakedret
     - nestif
     - nilerr
-    - nilnil
     - noctx
     - nolintlint
     - prealloc
