@@ -73,7 +73,7 @@ func NewStartCommand() *cobra.Command {
 
 			go func() {
 				for range time.Tick(batchWindow) {
-					actorCTX.Send(faucetPID, message.TriggerTx{
+					actorCTX.Send(faucetPID, &message.TriggerTx{
 						Deadline:  time.Now().Add(txTimeout),
 						Memo:      memo,
 						GasLimit:  gasLimit,

@@ -27,7 +27,7 @@ func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*st
 		return nil, err
 	}
 
-	r.Context.Send(r.Faucet, message.RequestFunds{Address: addr})
+	r.Context.Send(r.Faucet, &message.RequestFunds{Address: addr})
 	return nil, nil
 }
 
@@ -52,13 +52,13 @@ func (r *subscriptionResolver) Send(ctx context.Context, input model.SendInput) 
 	txResponseChan := make(chan *model.TxResponse)
 	r.Context.Send(
 		r.Faucet,
-		message.RequestFunds{
+		&message.RequestFunds{
 			Address: addr,
 			TxSubscriber: r.Context.Spawn(
 				actor.PropsFromFunc(
 					func(c actor.Context) {
 						switch msg := c.Message().(type) {
-						case message.BroadcastTxResponse:
+						case *message.BroadcastTxResponse:
 							txResponseChan <- &model.TxResponse{
 								Hash:      msg.TxResponse.TxHash,
 								Code:      int(msg.TxResponse.Code),

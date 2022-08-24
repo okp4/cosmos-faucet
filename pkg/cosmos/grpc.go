@@ -30,7 +30,7 @@ func NewGrpcClient(address string, transportCreds credentials.TransportCredentia
 
 func (client *GrpcClient) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
-	case message.GetAccount:
+	case *message.GetAccount:
 		goCTX, cancelFunc := context.WithDeadline(context.Background(), msg.Deadline)
 		defer cancelFunc()
 
@@ -38,11 +38,11 @@ func (client *GrpcClient) Receive(ctx actor.Context) {
 		if err != nil {
 			panic(err)
 		}
-		ctx.Respond(message.GetAccountResponse{
+		ctx.Respond(&message.GetAccountResponse{
 			Account: account,
 		})
 
-	case message.BroadcastTx:
+	case *message.BroadcastTx:
 		goCTX, cancelFunc := context.WithDeadline(context.Background(), msg.Deadline)
 		defer cancelFunc()
 
@@ -50,7 +50,7 @@ func (client *GrpcClient) Receive(ctx actor.Context) {
 		if err != nil {
 			panic(err)
 		}
-		ctx.Respond(message.BroadcastTxResponse{
+		ctx.Respond(&message.BroadcastTxResponse{
 			TxResponse: resp,
 		})
 	}

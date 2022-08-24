@@ -70,7 +70,7 @@ func (handler *TxHandler) Receive(ctx actor.Context) {
 	case *actor.Started:
 		handler.cosmosClient = ctx.Spawn(handler.cosmosClientProps)
 
-	case message.MakeTx:
+	case *message.MakeTx:
 		if time.Now().After(msg.Deadline) {
 			log.Warn().Msg("😞 Deadline exceeded, ignore transaction.")
 			break
@@ -83,7 +83,7 @@ func (handler *TxHandler) Receive(ctx actor.Context) {
 
 		accountResp, err := ctx.RequestFuture(
 			handler.cosmosClient,
-			message.GetAccount{Deadline: msg.Deadline, Address: handler.address},
+			&message.GetAccount{Deadline: msg.Deadline, Address: handler.address},
 			msg.Deadline.Sub(time.Now()),
 		).Result()
 		if err != nil {
@@ -92,7 +92,7 @@ func (handler *TxHandler) Receive(ctx actor.Context) {
 
 		var account *auth.BaseAccount
 		switch resp := accountResp.(type) {
-		case message.GetAccountResponse:
+		case *message.GetAccountResponse:
 			account = resp.Account
 		default:
 			log.Panic().Err(fmt.Errorf("wrong response message")).Msg("❌ Could not get account information.")
@@ -116,7 +116,7 @@ func (handler *TxHandler) Receive(ctx actor.Context) {
 
 		txResp, err := ctx.RequestFuture(
 			handler.cosmosClient,
-			message.BroadcastTx{Deadline: msg.Deadline, Tx: tx},
+			&message.BroadcastTx{Deadline: msg.Deadline, Tx: tx},
 			msg.Deadline.Sub(time.Now()),
 		).Result()
 		if err != nil {
@@ -124,8 +124,8 @@ func (handler *TxHandler) Receive(ctx actor.Context) {
 		}
 
 		switch resp := txResp.(type) {
-		case message.BroadcastTxResponse:
-			ctx.Send(msg.TxSubscriber, resp)
+		case *message.BroadcastTxResponse:
+			ctx.Forward(msg.TxSubscriber)
 			if resp.TxResponse.Code != 0 {
 				log.Warn().
 					Int("messageCount", len(msg.Msgs)).

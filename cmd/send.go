@@ -51,11 +51,11 @@ func NewSendCommand() *cobra.Command {
 				}
 			}))
 
-			actorCTX.Send(faucetPID, message.RequestFunds{
+			actorCTX.Send(faucetPID, &message.RequestFunds{
 				Address:      toAddress,
 				TxSubscriber: subPID,
 			})
-			actorCTX.Send(faucetPID, message.TriggerTx{
+			actorCTX.Send(faucetPID, &message.TriggerTx{
 				Deadline:  time.Now().Add(txTimeout),
 				Memo:      memo,
 				GasLimit:  gasLimit,

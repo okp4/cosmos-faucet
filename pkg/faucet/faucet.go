@@ -11,7 +11,6 @@ import (
 )
 
 type Faucet struct {
-	chainID        string
 	address        types.AccAddress
 	amount         types.Coins
 	txHandlerProps *actor.Props
@@ -30,12 +29,6 @@ func NewFaucet(opts ...Option) *Faucet {
 }
 
 type Option func(faucet *Faucet)
-
-func WithChainID(chainID string) Option {
-	return func(faucet *Faucet) {
-		faucet.chainID = chainID
-	}
-}
 
 func WithAddress(address types.AccAddress) Option {
 	return func(faucet *Faucet) {
@@ -60,21 +53,21 @@ func (faucet *Faucet) Receive(ctx actor.Context) {
 	case *actor.Started:
 		faucet.txHandler = ctx.Spawn(faucet.txHandlerProps)
 
-	case message.RequestFunds:
+	case *message.RequestFunds:
 		faucet.msgs = append(faucet.msgs, faucet.MakeSendMsg(msg.Address))
 		if msg.TxSubscriber != nil {
 			faucet.txSubscribers = append(faucet.txSubscribers, msg.TxSubscriber)
 		}
 		log.Info().Str("address", msg.Address.String()).Msg("✍️  Register fund request")
 
-	case message.TriggerTx:
+	case *message.TriggerTx:
 		if len(faucet.msgs) == 0 {
 			log.Info().Msg("😥 Ignore transaction trigger, no message to submit")
 			break
 		}
 
 		log.Info().Time("deadline", msg.Deadline).Msg("🔥 Trigger new transaction")
-		ctx.Send(faucet.txHandler, message.MakeTx{
+		ctx.Send(faucet.txHandler, &message.MakeTx{
 			Deadline:     msg.Deadline,
 			TxSubscriber: ctx.Spawn(router.NewBroadcastGroup(faucet.txSubscribers...)),
 			Msgs:         faucet.msgs,
