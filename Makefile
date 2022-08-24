@@ -70,9 +70,15 @@ $(ENVIRONMENTS_TARGETS):
 
 
 ## Generate:
-generate: ## Generate graphql models and resolvers based on the schema
+generate: generate-graphql generate-mock
+
+generate-graphql: ## Generate graphql models and resolvers based on the schema
 	@echo "${COLOR_CYAN} 📋 Generate graphql models and resolvers ${BINARY_NAME}${COLOR_RESET}"
 	@go run github.com/99designs/gqlgen generate
+
+generate-mock:
+	@echo "${COLOR_CYAN} 🧪 Generate test mocks ${BINARY_NAME}${COLOR_RESET}"
+	@mockery --srcpkg github.com/asynkron/protoactor-go/actor --name Context --output test/mock --outpkg mock --filename actor_context.go --structname MockedContext
 
 ## Install:
 install: ## Install executable
