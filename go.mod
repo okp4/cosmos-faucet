@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.14
 	github.com/cosmos/cosmos-sdk v0.46.0
 	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/prometheus/client_golang v1.13.0
 	github.com/rs/zerolog v1.27.0
 	github.com/smartystreets/goconvey v1.7.2
@@ -14,7 +15,7 @@ require (
 	github.com/spf13/viper v1.12.0
 	github.com/vektah/gqlparser/v2 v2.4.8
 	github.com/wingyplus/must v0.0.0-20211102134737-321dc31d3ea6
-	google.golang.org/grpc v1.48.0
+	google.golang.org/grpc v1.49.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -71,7 +72,6 @@ require (
 	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect
