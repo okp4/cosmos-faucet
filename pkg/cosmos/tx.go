@@ -39,6 +39,15 @@ func NewTxHandler(opts ...Option) *TxHandler {
 
 type Option func(handler *TxHandler)
 
+func WithMnemonicMust(mnemonic string) Option {
+	privateKey, err := ParseMnemonic(mnemonic)
+	if err != nil {
+		panic(err)
+	}
+
+	return WithPrivateKey(privateKey)
+}
+
 func WithPrivateKey(privateKey crypto.PrivKey) Option {
 	return func(handler *TxHandler) {
 		handler.privKey = privateKey
