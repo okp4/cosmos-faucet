@@ -78,7 +78,7 @@ generate-graphql: ## Generate graphql models and resolvers based on the schema
 
 generate-mock:
 	@echo "${COLOR_CYAN} 🧪 Generate test mocks ${BINARY_NAME}${COLOR_RESET}"
-	@mockery --srcpkg github.com/asynkron/protoactor-go/actor --name Context --output test/mock --outpkg mock --filename actor_context.go --structname MockedContext
+	@mockery --srcpkg github.com/asynkron/protoactor-go/actor --name Context --output test/mock --outpkg mock --filename actor_context.go --structname ActorContext
 
 ## Install:
 install: ## Install executable

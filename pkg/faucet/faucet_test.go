@@ -15,8 +15,8 @@ import (
 
 var (
 	amount   = types.NewCoins(types.NewInt64Coin("uknow", 1000000))
-	fromAddr = types.MustAccAddressFromBech32("from")
-	toAddr   = types.MustAccAddressFromBech32("to")
+	fromAddr = types.AccAddress("from")
+	toAddr   = types.AccAddress("to")
 )
 
 func TestOptions(t *testing.T) {
@@ -42,17 +42,17 @@ func TestOptions(t *testing.T) {
 	})
 }
 
-func TestSpawnTxHandler(t *testing.T) {
+func TestStarted(t *testing.T) {
 	Convey("Given a faucet actor", t, func() {
 		faucet := NewFaucet(WithTxHandlerProps(actor.PropsFromFunc(func(c actor.Context) {})))
 
 		Convey("When receiving a Started message", func() {
-			mockedContext := &mock.MockedContext{}
+			mockedContext := &mock.ActorContext{}
 			mockedContext.On("Message").Return(&actor.Started{})
 			mockedContext.On("Spawn", Anything).Return(&actor.PID{})
 			faucet.Receive(mockedContext)
 
-			Convey("Then the TxHandler actor should be spawn", func() {
+			Convey("Then the TxHandler actor should be spawned", func() {
 				mockedContext.AssertCalled(t, "Message")
 				mockedContext.AssertCalled(t, "Spawn", Anything)
 				So(faucet.txHandler, ShouldNotBeNil)
@@ -70,7 +70,7 @@ func TestRequestFundsWithoutSubscriber(t *testing.T) {
 		)
 
 		Convey("When receiving a RequestFunds message without subscriber", func() {
-			mockedContext := &mock.MockedContext{}
+			mockedContext := &mock.ActorContext{}
 			mockedContext.On("Message").Return(&message.RequestFunds{Address: toAddr})
 			faucet.Receive(mockedContext)
 
@@ -89,7 +89,7 @@ func TestRequestFundsWithSubscriber(t *testing.T) {
 		faucet := &Faucet{address: fromAddr, amount: amount}
 
 		Convey("When receiving a RequestFunds message with subscriber", func() {
-			mockedContext := &mock.MockedContext{}
+			mockedContext := &mock.ActorContext{}
 			mockedContext.On("Message").Return(&message.RequestFunds{Address: toAddr, TxSubscriber: &actor.PID{}})
 			faucet.Receive(mockedContext)
 
@@ -114,7 +114,7 @@ func TestTriggerTxWithoutMsgs(t *testing.T) {
 				GasLimit:  200000,
 				FeeAmount: amount,
 			}
-			mockedContext := &mock.MockedContext{}
+			mockedContext := &mock.ActorContext{}
 			mockedContext.On("Message").Return(&triggerMsg)
 			faucet.Receive(mockedContext)
 
@@ -138,6 +138,7 @@ func TestTriggerTxWithMsgs(t *testing.T) {
 		faucet := &Faucet{
 			msgs:          txMsgs,
 			txSubscribers: []*actor.PID{{}, {}},
+			txHandler:     &actor.PID{Id: "txHandler"},
 		}
 
 		Convey("When receiving a TriggerTx message", func() {
@@ -148,9 +149,9 @@ func TestTriggerTxWithMsgs(t *testing.T) {
 				GasLimit:  200000,
 				FeeAmount: amount,
 			}
-			mockedContext := &mock.MockedContext{}
+			mockedContext := &mock.ActorContext{}
 			mockedContext.On("Message").Return(&triggerMsg)
-			mockedContext.On("Spawn", Anything).Return(&actor.PID{})
+			mockedContext.On("Spawn", Anything).Return(&actor.PID{Id: "subscriber"})
 			mockedContext.On("Send", Anything, Anything).Run(func(args Arguments) {
 				messageSent = args.Get(1)
 			}).Return()
@@ -159,12 +160,12 @@ func TestTriggerTxWithMsgs(t *testing.T) {
 			Convey("Then the send msg should be in the pool with no subscriber", func() {
 				mockedContext.AssertCalled(t, "Message")
 				mockedContext.AssertCalled(t, "Spawn", Anything)
-				mockedContext.AssertCalled(t, "Send", Anything, Anything)
+				mockedContext.AssertCalled(t, "Send", &actor.PID{Id: "txHandler"}, Anything)
 				So(len(faucet.msgs), ShouldEqual, 0)
 				So(len(faucet.txSubscribers), ShouldEqual, 0)
 				So(messageSent, ShouldHaveSameTypeAs, &message.MakeTx{})
 				So(messageSent.(*message.MakeTx).Deadline, ShouldResemble, triggerMsg.Deadline)
-				So(messageSent.(*message.MakeTx).TxSubscriber, ShouldNotBeNil)
+				So(messageSent.(*message.MakeTx).TxSubscriber.Id, ShouldEqual, "subscriber")
 				So(messageSent.(*message.MakeTx).Msgs, ShouldResemble, txMsgs)
 				So(messageSent.(*message.MakeTx).Memo, ShouldResemble, "Sent from tests")
 				So(messageSent.(*message.MakeTx).GasLimit, ShouldEqual, 200000)
