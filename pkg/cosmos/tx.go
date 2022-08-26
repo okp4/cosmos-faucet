@@ -96,7 +96,7 @@ func (handler *TxHandler) Receive(ctx actor.Context) {
 			msg.Deadline.Sub(time.Now()),
 		).Result()
 		if err != nil {
-			log.Panic().Err(err).Msg("❌ Could get account information.")
+			log.Panic().Err(err).Msg("❌ Could not get account information.")
 		}
 
 		var account *auth.BaseAccount
@@ -134,7 +134,7 @@ func (handler *TxHandler) Receive(ctx actor.Context) {
 
 		switch resp := txResp.(type) {
 		case *message.BroadcastTxResponse:
-			ctx.Forward(msg.TxSubscriber)
+			ctx.Send(msg.TxSubscriber, txResp)
 			if resp.TxResponse.Code != 0 {
 				log.Warn().
 					Int("messageCount", len(msg.Msgs)).
