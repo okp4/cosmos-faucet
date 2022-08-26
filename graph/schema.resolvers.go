@@ -57,8 +57,7 @@ func (r *subscriptionResolver) Send(ctx context.Context, input model.SendInput) 
 			TxSubscriber: r.Context.Spawn(
 				actor.PropsFromFunc(
 					func(c actor.Context) {
-						switch msg := c.Message().(type) {
-						case *message.BroadcastTxResponse:
+						if msg, ok := c.Message().(*message.BroadcastTxResponse); ok {
 							txResponseChan <- &model.TxResponse{
 								Hash:      msg.TxResponse.TxHash,
 								Code:      int(msg.TxResponse.Code),

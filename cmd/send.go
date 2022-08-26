@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"okp4/cosmos-faucet/pkg/actor/bootstrap"
 	"okp4/cosmos-faucet/pkg/actor/message"
+	"okp4/cosmos-faucet/pkg/actor/system"
 	"okp4/cosmos-faucet/pkg/cosmos"
 	"sync"
 	"time"
@@ -33,7 +33,7 @@ func NewSendCommand() *cobra.Command {
 				log.Panic().Err(err).Str("toAddress", args[0]).Msg("❌ Could not parse address")
 			}
 
-			actorCTX, faucetPID := bootstrap.BootstrapActors(
+			actorCTX, faucetPID := system.BootstrapActors(
 				chainID,
 				privKey,
 				types.NewCoins(types.NewInt64Coin(denom, amountSend)),
@@ -44,8 +44,7 @@ func NewSendCommand() *cobra.Command {
 			wg := sync.WaitGroup{}
 			wg.Add(1)
 			subPID := actorCTX.Spawn(actor.PropsFromFunc(func(c actor.Context) {
-				switch c.Message().(type) {
-				case message.BroadcastTxResponse:
+				if _, ok := c.Message().(*message.BroadcastTxResponse); ok {
 					wg.Done()
 					c.Stop(c.Self())
 				}

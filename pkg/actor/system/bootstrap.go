@@ -1,4 +1,4 @@
-package bootstrap
+package system
 
 import (
 	"okp4/cosmos-faucet/pkg/cosmos"

@@ -4,8 +4,8 @@ import (
 	"okp4/cosmos-faucet/graph"
 	"okp4/cosmos-faucet/graph/model"
 	"okp4/cosmos-faucet/internal/server"
-	"okp4/cosmos-faucet/pkg/actor/bootstrap"
 	"okp4/cosmos-faucet/pkg/actor/message"
+	"okp4/cosmos-faucet/pkg/actor/system"
 	"okp4/cosmos-faucet/pkg/captcha"
 	"okp4/cosmos-faucet/pkg/cosmos"
 	"time"
@@ -47,7 +47,7 @@ func NewStartCommand() *cobra.Command {
 				log.Panic().Err(err).Msg("❌ Could not parse mnemonic")
 			}
 
-			actorCTX, faucetPID := bootstrap.BootstrapActors(
+			actorCTX, faucetPID := system.BootstrapActors(
 				chainID,
 				privKey,
 				types.NewCoins(types.NewInt64Coin(denom, amountSend)),

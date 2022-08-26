@@ -74,6 +74,7 @@ func WithCosmosClientProps(props *actor.Props) Option {
 	}
 }
 
+// nolint: funlen
 func (handler *TxHandler) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *actor.Started:
@@ -93,7 +94,7 @@ func (handler *TxHandler) Receive(ctx actor.Context) {
 		accountResp, err := ctx.RequestFuture(
 			handler.cosmosClient,
 			&message.GetAccount{Deadline: msg.Deadline, Address: handler.address},
-			msg.Deadline.Sub(time.Now()),
+			time.Until(msg.Deadline),
 		).Result()
 		if err != nil {
 			log.Panic().Err(err).Msg("❌ Could not get account information.")
@@ -126,7 +127,7 @@ func (handler *TxHandler) Receive(ctx actor.Context) {
 		txResp, err := ctx.RequestFuture(
 			handler.cosmosClient,
 			&message.BroadcastTx{Deadline: msg.Deadline, Tx: tx},
-			msg.Deadline.Sub(time.Now()),
+			time.Until(msg.Deadline),
 		).Result()
 		if err != nil {
 			log.Panic().Err(err).Msg("❌ Could not broadcast transaction.")
@@ -153,7 +154,12 @@ func (handler *TxHandler) Receive(ctx actor.Context) {
 	}
 }
 
-func (handler *TxHandler) BuildUnsignedTx(msgs []types.Msg, memo string, gasLimit uint64, feeAmount types.Coins) (sdk.TxBuilder, error) {
+func (handler *TxHandler) BuildUnsignedTx(
+	msgs []types.Msg,
+	memo string,
+	gasLimit uint64,
+	feeAmount types.Coins,
+) (sdk.TxBuilder, error) {
 	txBuilder := handler.config.NewTxBuilder()
 
 	err := txBuilder.SetMsgs(msgs...)
