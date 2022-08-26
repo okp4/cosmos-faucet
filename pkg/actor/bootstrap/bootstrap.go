@@ -40,7 +40,6 @@ func BootstrapActors(
 	actorCTX := actor.NewActorSystem().Root
 	return actorCTX, actorCTX.Spawn(actor.PropsFromProducer(func() actor.Actor {
 		return faucet.NewFaucet(
-			faucet.WithChainID(chainID),
 			faucet.WithAmount(sendAmount),
 			faucet.WithAddress(types.AccAddress(privKey.PubKey().Address())),
 			faucet.WithTxHandlerProps(txHandlerProps),
