@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	auth "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -30,6 +31,10 @@ func NewGrpcClient(address string, transportCreds credentials.TransportCredentia
 
 func (client *GrpcClient) Receive(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
+	case *actor.Stopping:
+		if err := client.grpcConn.Close(); err != nil {
+			log.Warn().Err(err).Msg("😥 Could not close grpc connection.")
+		}
 	case *message.GetAccount:
 		goCTX, cancelFunc := context.WithDeadline(context.Background(), msg.Deadline)
 		defer cancelFunc()
@@ -85,8 +90,4 @@ func (client *GrpcClient) BroadcastTx(context context.Context, txBytes []byte) (
 	}
 
 	return grpcRes.TxResponse, nil
-}
-
-func (client *GrpcClient) Close() error {
-	return client.grpcConn.Close()
 }
