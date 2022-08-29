@@ -1,9 +1,15 @@
 package cmd
 
 import (
-	"okp4/cosmos-faucet/pkg/client"
+	"okp4/cosmos-faucet/pkg/actor/message"
+	"okp4/cosmos-faucet/pkg/actor/system"
+	"okp4/cosmos-faucet/pkg/cosmos"
+	"sync"
 	"time"
 
+	"github.com/asynkron/protoactor-go/actor"
+	"github.com/cosmos/cosmos-sdk/types"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -13,24 +19,50 @@ func NewSendCommand() *cobra.Command {
 		Use:   "send <address>",
 		Short: "Send tokens to a given address",
 		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			send := make(chan *client.TriggerTx)
-			faucet, err := client.NewFaucet(config, send)
+		Run: func(cmd *cobra.Command, args []string) {
+			conf := types.GetConfig()
+			conf.SetBech32PrefixForAccount(prefix, prefix)
+
+			privKey, err := cosmos.ParseMnemonic(mnemonic)
 			if err != nil {
-				return err
+				log.Panic().Err(err).Msg("❌ Could not parse mnemonic")
 			}
 
-			defer func(faucet *client.Faucet) {
-				_ = faucet.Close()
-			}(faucet)
-
-			if err := faucet.Send(args[0]); err != nil {
-				return err
+			toAddress, err := types.GetFromBech32(args[0], prefix)
+			if err != nil {
+				log.Panic().Err(err).Str("toAddress", args[0]).Msg("❌ Could not parse address")
 			}
 
-			send <- client.MakeTriggerTx(client.WithDeadline(time.Now().Add(config.TxTimeout)))
+			actorCTX, faucetPID := system.BootstrapActors(
+				chainID,
+				privKey,
+				types.NewCoins(types.NewInt64Coin(denom, amountSend)),
+				grpcAddress,
+				getTransportCredentials(),
+			)
 
-			return err
+			wg := sync.WaitGroup{}
+			wg.Add(1)
+			subPID := actorCTX.Spawn(actor.PropsFromFunc(func(c actor.Context) {
+				if _, ok := c.Message().(*message.BroadcastTxResponse); ok {
+					wg.Done()
+					c.Stop(c.Self())
+				}
+			}))
+
+			actorCTX.Send(faucetPID, &message.RequestFunds{
+				Address:      toAddress,
+				TxSubscriber: subPID,
+			})
+			actorCTX.Send(faucetPID, &message.TriggerTx{
+				Deadline:  time.Now().Add(txTimeout),
+				Memo:      memo,
+				GasLimit:  gasLimit,
+				FeeAmount: types.NewCoins(types.NewInt64Coin(denom, feeAmount)),
+			})
+
+			wg.Wait()
+			actorCTX.Stop(faucetPID)
 		},
 	}
 

@@ -2,20 +2,11 @@ package server
 
 import (
 	"net/http"
-	"okp4/cosmos-faucet/pkg/captcha"
-	"okp4/cosmos-faucet/pkg/client"
+	"okp4/cosmos-faucet/graph"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
 )
-
-// Config holds config of the http server.
-type Config struct {
-	EnableMetrics bool `mapstructure:"metrics"`
-	EnableHealth  bool `mapstructure:"health"`
-	Faucet        *client.Faucet
-	CaptchaConf   captcha.ResolverConfig
-}
 
 // HTTPServer exposes server methods.
 type HTTPServer interface {
@@ -27,11 +18,11 @@ type httpServer struct {
 }
 
 // NewServer creates a new httpServer containing router.
-func NewServer(config Config) HTTPServer {
+func NewServer(graphqlResolver *graph.Resolver, health, metrics bool) HTTPServer {
 	server := &httpServer{
 		router: mux.NewRouter().StrictSlash(true),
 	}
-	server.createRoutes(config)
+	server.createRoutes(graphqlResolver, health, metrics)
 	return server
 }
 

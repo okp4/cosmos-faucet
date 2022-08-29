@@ -7,64 +7,72 @@ import (
 	"context"
 	"okp4/cosmos-faucet/graph/generated"
 	"okp4/cosmos-faucet/graph/model"
+	"okp4/cosmos-faucet/pkg/actor/message"
 
+	"github.com/asynkron/protoactor-go/actor"
+	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog/log"
 )
 
 // Send is the resolver for the send field.
-func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (void *string, err error) {
+func (r *mutationResolver) Send(ctx context.Context, input model.SendInput) (*string, error) {
+	addr, err := types.GetFromBech32(input.ToAddress, r.AddressPrefix)
+	if err != nil {
+		log.Err(err).Str("toAddress", input.ToAddress).Msg("❌ Could not serve send mutation")
+		return nil, err
+	}
+
 	if err = r.CaptchaResolver.CheckRecaptcha(ctx, input.CaptchaToken); err != nil {
-		return
+		log.Err(err).Str("toAddress", input.ToAddress).Msg("❌ Could not serve send mutation")
+		return nil, err
 	}
 
-	if err = r.Faucet.Send(input.ToAddress); err != nil {
-		log.Err(err).Str("toAddress", input.ToAddress).Msg("Could not register send request")
-		return
-	}
-
-	log.Info().Str("toAddress", input.ToAddress).Msg("Register send request")
-	return
+	r.Context.Send(r.Faucet, &message.RequestFunds{Address: addr})
+	return nil, nil
 }
 
 // Configuration is the resolver for the configuration field.
 func (r *queryResolver) Configuration(ctx context.Context) (*model.Configuration, error) {
-	return &model.Configuration{
-		ChainID:    r.Faucet.GetConfig().ChainID,
-		Denom:      r.Faucet.GetConfig().Denom,
-		Prefix:     r.Faucet.GetConfig().Prefix,
-		AmountSend: r.Faucet.GetConfig().AmountSend,
-		FeeAmount:  r.Faucet.GetConfig().FeeAmount,
-		Memo:       r.Faucet.GetConfig().Memo,
-		GasLimit:   r.Faucet.GetConfig().GasLimit,
-	}, nil
+	return r.Config, nil
 }
 
 // Send is the resolver for the send field.
 func (r *subscriptionResolver) Send(ctx context.Context, input model.SendInput) (<-chan *model.TxResponse, error) {
-	if err := r.CaptchaResolver.CheckRecaptcha(ctx, input.CaptchaToken); err != nil {
-		return nil, err
-	}
-
-	rawTxResponseChan, err := r.Faucet.Subscribe(input.ToAddress)
+	addr, err := types.GetFromBech32(input.ToAddress, r.AddressPrefix)
 	if err != nil {
-		log.Err(err).Str("toAddress", input.ToAddress).Msg("Could not register send request")
+		log.Err(err).Str("toAddress", input.ToAddress).Msg("❌ Could not serve send mutation")
 		return nil, err
 	}
 
-	log.Info().Str("toAddress", input.ToAddress).Msg("Register send request")
+	if err := r.CaptchaResolver.CheckRecaptcha(ctx, input.CaptchaToken); err != nil {
+		log.Err(err).Str("toAddress", input.ToAddress).Msg("❌ Could not serve send mutation")
+		return nil, err
+	}
+
 	txResponseChan := make(chan *model.TxResponse)
-	go func() {
-		for rawTx := range rawTxResponseChan {
-			txResponseChan <- &model.TxResponse{
-				Hash:      rawTx.TxHash,
-				Code:      int(rawTx.Code),
-				RawLog:    &rawTx.RawLog,
-				GasWanted: rawTx.GasWanted,
-				GasUsed:   rawTx.GasUsed,
-			}
-		}
-		close(txResponseChan)
-	}()
+	r.Context.Send(
+		r.Faucet,
+		&message.RequestFunds{
+			Address: addr,
+			TxSubscriber: r.Context.Spawn(
+				actor.PropsFromFunc(
+					func(c actor.Context) {
+						if msg, ok := c.Message().(*message.BroadcastTxResponse); ok {
+							txResponseChan <- &model.TxResponse{
+								Hash:      msg.TxResponse.TxHash,
+								Code:      int(msg.TxResponse.Code),
+								RawLog:    &msg.TxResponse.RawLog,
+								GasWanted: msg.TxResponse.GasWanted,
+								GasUsed:   msg.TxResponse.GasUsed,
+							}
+							close(txResponseChan)
+							c.Stop(c.Self())
+						}
+					},
+				),
+			),
+		},
+	)
 
 	return txResponseChan, nil
 }

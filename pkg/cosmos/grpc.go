@@ -2,15 +2,67 @@ package cosmos
 
 import (
 	"context"
+	"okp4/cosmos-faucet/pkg/actor/message"
 
+	"github.com/asynkron/protoactor-go/actor"
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	auth "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
-func GetAccount(context context.Context, grpcConn *grpc.ClientConn, address string) (*auth.BaseAccount, error) {
-	authClient := auth.NewQueryClient(grpcConn)
+type GrpcClient struct {
+	grpcConn *grpc.ClientConn
+}
+
+func NewGrpcClient(address string, transportCreds credentials.TransportCredentials) (*GrpcClient, error) {
+	grpcConn, err := grpc.Dial(
+		address,
+		grpc.WithTransportCredentials(transportCreds),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &GrpcClient{grpcConn: grpcConn}, nil
+}
+
+func (client *GrpcClient) Receive(ctx actor.Context) {
+	switch msg := ctx.Message().(type) {
+	case *actor.Stopping:
+		if err := client.grpcConn.Close(); err != nil {
+			log.Warn().Err(err).Msg("😥 Could not close grpc connection.")
+		}
+	case *message.GetAccount:
+		goCTX, cancelFunc := context.WithDeadline(context.Background(), msg.Deadline)
+		defer cancelFunc()
+
+		account, err := client.GetAccount(goCTX, msg.Address)
+		if err != nil {
+			panic(err)
+		}
+		ctx.Respond(&message.GetAccountResponse{
+			Account: account,
+		})
+
+	case *message.BroadcastTx:
+		goCTX, cancelFunc := context.WithDeadline(context.Background(), msg.Deadline)
+		defer cancelFunc()
+
+		resp, err := client.BroadcastTx(goCTX, msg.Tx)
+		if err != nil {
+			panic(err)
+		}
+		ctx.Respond(&message.BroadcastTxResponse{
+			TxResponse: resp,
+		})
+	}
+}
+
+func (client *GrpcClient) GetAccount(context context.Context, address string) (*auth.BaseAccount, error) {
+	authClient := auth.NewQueryClient(client.grpcConn)
 	query, err := authClient.Account(context, &auth.QueryAccountRequest{Address: address})
 	if err != nil {
 		return nil, err
@@ -24,8 +76,8 @@ func GetAccount(context context.Context, grpcConn *grpc.ClientConn, address stri
 	return &account, nil
 }
 
-func BroadcastTx(context context.Context, grpcConn *grpc.ClientConn, txBytes []byte) (*types.TxResponse, error) {
-	txClient := tx.NewServiceClient(grpcConn)
+func (client *GrpcClient) BroadcastTx(context context.Context, txBytes []byte) (*types.TxResponse, error) {
+	txClient := tx.NewServiceClient(client.grpcConn)
 	grpcRes, err := txClient.BroadcastTx(
 		context,
 		&tx.BroadcastTxRequest{

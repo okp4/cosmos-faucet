@@ -1,10 +1,16 @@
 package cmd
 
 import (
+	"okp4/cosmos-faucet/graph"
+	"okp4/cosmos-faucet/graph/model"
 	"okp4/cosmos-faucet/internal/server"
-	"okp4/cosmos-faucet/pkg/client"
+	"okp4/cosmos-faucet/pkg/actor/message"
+	"okp4/cosmos-faucet/pkg/actor/system"
+	"okp4/cosmos-faucet/pkg/captcha"
+	"okp4/cosmos-faucet/pkg/cosmos"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -20,37 +26,63 @@ const (
 	FlagEnableCaptcha = "captcha"
 )
 
-var serverConfig server.Config
-
 // NewStartCommand returns a CLI command to start the REST api allowing to send tokens.
 // nolint: funlen
 func NewStartCommand() *cobra.Command {
 	var addr string
 	var batchWindow time.Duration
+	var metrics bool
+	var health bool
+	var captchaConf captcha.ResolverConfig
 
 	startCmd := &cobra.Command{
 		Use:   "start",
 		Short: "Start the GraphQL api",
 		Run: func(cmd *cobra.Command, args []string) {
-			triggerTxChan := make(chan *client.TriggerTx)
+			conf := types.GetConfig()
+			conf.SetBech32PrefixForAccount(prefix, prefix)
+
+			privKey, err := cosmos.ParseMnemonic(mnemonic)
+			if err != nil {
+				log.Panic().Err(err).Msg("❌ Could not parse mnemonic")
+			}
+
+			actorCTX, faucetPID := system.BootstrapActors(
+				chainID,
+				privKey,
+				types.NewCoins(types.NewInt64Coin(denom, amountSend)),
+				grpcAddress,
+				getTransportCredentials(),
+			)
+
+			graphqlResolver := &graph.Resolver{
+				Faucet:          faucetPID,
+				Context:         actorCTX,
+				AddressPrefix:   prefix,
+				CaptchaResolver: captcha.NewCaptchaResolver(captchaConf),
+				Config: &model.Configuration{
+					AmountSend: amountSend,
+					ChainID:    chainID,
+					Denom:      denom,
+					FeeAmount:  feeAmount,
+					GasLimit:   gasLimit,
+					Memo:       memo,
+					Prefix:     prefix,
+				},
+			}
+
 			go func() {
 				for range time.Tick(batchWindow) {
-					triggerTxChan <- client.MakeTriggerTx(client.WithDeadline(time.Now().Add(config.TxTimeout)))
+					actorCTX.Send(faucetPID, &message.TriggerTx{
+						Deadline:  time.Now().Add(txTimeout),
+						Memo:      memo,
+						GasLimit:  gasLimit,
+						FeeAmount: types.NewCoins(types.NewInt64Coin(denom, feeAmount)),
+					})
 				}
 			}()
 
-			faucet, err := client.NewFaucet(config, triggerTxChan)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed create a new faucet instance")
-			}
-
-			defer func(faucet *client.Faucet) {
-				_ = faucet.Close()
-				log.Info().Msg("Server stopped")
-			}(faucet)
-
-			serverConfig.Faucet = faucet
-			server.NewServer(serverConfig).Start(addr)
+			server.NewServer(graphqlResolver, health, metrics).Start(addr)
 		},
 	}
 
@@ -61,28 +93,28 @@ func NewStartCommand() *cobra.Command {
 		8*time.Second,
 		"Batch temporal window, can be seen a the minimum duration between too transactions.",
 	)
-	startCmd.Flags().BoolVar(&serverConfig.EnableMetrics, FlagMetrics, false, "enable metrics endpoint")
-	startCmd.Flags().BoolVar(&serverConfig.EnableHealth, FlagHealth, false, "enable health endpoint")
+	startCmd.Flags().BoolVar(&metrics, FlagMetrics, false, "enable metrics endpoint")
+	startCmd.Flags().BoolVar(&health, FlagHealth, false, "enable health endpoint")
 	startCmd.Flags().BoolVar(
-		&serverConfig.CaptchaConf.Enable,
+		&captchaConf.Enable,
 		FlagEnableCaptcha,
 		false,
 		"enable captcha verification",
 	)
 	startCmd.Flags().StringVar(
-		&serverConfig.CaptchaConf.Secret,
+		&captchaConf.Secret,
 		FlagCaptchaSecret,
 		"",
 		"set Captcha secret",
 	)
 	startCmd.Flags().StringVar(
-		&serverConfig.CaptchaConf.VerifyURL,
+		&captchaConf.VerifyURL,
 		FlagCaptchaURL,
 		"https://www.google.com/recaptcha/api/siteverify",
 		"set Captcha verify URL",
 	)
 	startCmd.Flags().Float64Var(
-		&serverConfig.CaptchaConf.MinScore,
+		&captchaConf.MinScore,
 		FlagCaptchaScore,
 		0.5,
 		"set Captcha min score",

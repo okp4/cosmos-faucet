@@ -5,7 +5,6 @@ import (
 	"okp4/cosmos-faucet/graph"
 	"okp4/cosmos-faucet/graph/generated"
 	"okp4/cosmos-faucet/internal/server/handlers"
-	"okp4/cosmos-faucet/pkg/captcha"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -17,7 +16,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func (s *httpServer) createRoutes(config Config) {
+func (s *httpServer) createRoutes(graphqlResolver *graph.Resolver, health, metrics bool) {
 	s.router.Path("/").
 		HandlerFunc(playground.Handler("GraphQL playground", "/graphql")).
 		Methods("GET")
@@ -25,20 +24,17 @@ func (s *httpServer) createRoutes(config Config) {
 		Handler(
 			newGraphQLServer(
 				generated.NewExecutableSchema(generated.Config{
-					Resolvers: &graph.Resolver{
-						Faucet:          config.Faucet,
-						CaptchaResolver: captcha.NewCaptchaResolver(config.CaptchaConf),
-					},
+					Resolvers: graphqlResolver,
 				}),
 			),
 		).
 		Methods("GET", "POST", "OPTIONS")
-	if config.EnableHealth {
+	if health {
 		s.router.Path("/health").
 			HandlerFunc(handlers.NewHealthRequestHandlerFunc()).
 			Methods("GET")
 	}
-	if config.EnableMetrics {
+	if metrics {
 		s.router.Path("/metrics").
 			Handler(handlers.NewMetricsRequestHandler()).
 			Methods("GET")
