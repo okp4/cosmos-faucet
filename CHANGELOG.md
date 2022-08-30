@@ -1,5 +1,35 @@
 # CØSMOS Faucet
 
+# [1.1.0](https://github.com/okp4/cosmos-faucet/compare/v1.0.0...v1.1.0) (2022-08-30)
+
+
+### Bug Fixes
+
+* **grpc:** properly stop grpc conn when actor stops ([1e4ced0](https://github.com/okp4/cosmos-faucet/commit/1e4ced0bd505ad411804308f421c286e3229329b))
+* make it build again ([dbaa637](https://github.com/okp4/cosmos-faucet/commit/dbaa637bf0d90e70f169a279d4e8a78e12df392c))
+* make linters happy ([363dc8f](https://github.com/okp4/cosmos-faucet/commit/363dc8ff3ce98b253c3c5f72721325bc348053b4))
+* minor imprecisions in tx handler ([835f283](https://github.com/okp4/cosmos-faucet/commit/835f28309d9cd57ca9c77216419be6f8178ae4b6))
+* **pool:** avoid sending empty transactions ([c1c4697](https://github.com/okp4/cosmos-faucet/commit/c1c46974fa8b780280990375b2b6bebc882bcb22))
+* **pool:** close channels in only one goroutine ([297b0f4](https://github.com/okp4/cosmos-faucet/commit/297b0f4786bd57aaac82fceb8193665d76d15021))
+
+
+### Features
+
+* add warn log on non 0 tx code ([b377e5f](https://github.com/okp4/cosmos-faucet/commit/b377e5fb5d7c31cf136f2158e77adfba3d7e6dec))
+* allow all origins ([d9ef2e8](https://github.com/okp4/cosmos-faucet/commit/d9ef2e81ebc7d127d8aa49e98458ce64656e0f75))
+* allow send & subscribe symulnateously ([8fece85](https://github.com/okp4/cosmos-faucet/commit/8fece8550f17464b3de18968ecedb3b216438284))
+* allow to set deadline on tx triggers ([bbf6451](https://github.com/okp4/cosmos-faucet/commit/bbf64515f1d3bb9ca5deda393ca93028a9876dd8))
+* **api:** implements send graphql subscription ([dad1aae](https://github.com/okp4/cosmos-faucet/commit/dad1aae2970d11acb885b261b344cd92e25823bb))
+* **api:** introduce the void scalar ([230de82](https://github.com/okp4/cosmos-faucet/commit/230de820e835a0649db1871e97ad8fd3871821ca))
+* **cli:** add temporal batch window flag ([566831c](https://github.com/okp4/cosmos-faucet/commit/566831c26ae728172212a6080c7e91e40f2bf43c))
+* **cli:** implement transaction timeout config ([973570c](https://github.com/okp4/cosmos-faucet/commit/973570ca2a220367ce0ca3fb8e02dde84d4392ac))
+* implement an atomic message pool ([99634d8](https://github.com/okp4/cosmos-faucet/commit/99634d888f61fd800044a3d769b46b5a8b3bca07))
+* implement message pool tx submitter option ([c881f68](https://github.com/okp4/cosmos-faucet/commit/c881f68d71d83f9be1b7b1d10553d0b9f63624d7))
+* implements msg batching ([77955fe](https://github.com/okp4/cosmos-faucet/commit/77955fea69098cce82b624ff6ae6b05a20afe6cb))
+* **metrics:** disable prometheus middleware ([8504e60](https://github.com/okp4/cosmos-faucet/commit/8504e60e7e25d1719c2a96253490956feed5c4fb))
+* setup basic faucet trigger channel ([6ef0d4f](https://github.com/okp4/cosmos-faucet/commit/6ef0d4fd8de1b91e9ce51f526ec0a28e43628453))
+* wire the faucet with the message pool ([ea3da76](https://github.com/okp4/cosmos-faucet/commit/ea3da76cf185a0814e19b4599d6c59e1a901b899))
+
 # 1.0.0 (2022-05-31)
 
 
