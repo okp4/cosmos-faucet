@@ -1,13 +1,14 @@
 # CØSMOS Faucet
 
-[![version](https://img.shields.io/github/v/release/okp4/cosmos-faucet)](https://github.com/okp4/cosmos-faucet/releases)
-[![build](https://github.com/okp4/cosmos-faucet/actions/workflows/build.yml/badge.svg)](https://github.com/okp4/cosmos-faucet/actions/workflows/build.yml)
-[![lint](https://github.com/okp4/cosmos-faucet/actions/workflows/lint.yml/badge.svg)](https://github.com/okp4/cosmos-faucet/actions/workflows/lint.yml)
-[![test](https://github.com/okp4/cosmos-faucet/actions/workflows/test.yml/badge.svg)](https://github.com/okp4/cosmos-faucet/actions/workflows/test.yml)
-[![maintainability](https://api.codeclimate.com/v1/badges/b2b9effa4c2f43ffbf3d/maintainability)](https://codeclimate.com/github/okp4/cosmos-faucet/maintainability)
-[![coverage](https://codecov.io/gh/okp4/cosmos-faucet/branch/main/graph/badge.svg?token=0VQHJDMY5B)](https://codecov.io/gh/okp4/cosmos-faucet)
-[![conventional commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-[![license](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![version](https://img.shields.io/github/v/release/okp4/cosmos-faucet?style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/releases)
+[![lint](https://img.shields.io/github/workflow/status/okp4/cosmos-faucet/Lint?label=lint&style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/actions/workflows/lint.yml)
+[![build](https://img.shields.io/github/workflow/status/okp4/cosmos-faucet/Build?label=build&style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/actions/workflows/build.yml)
+[![test](https://img.shields.io/github/workflow/status/okp4/cosmos-faucet/Test?label=test&style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/actions/workflows/test.yml)
+[![maintainability](https://img.shields.io/codeclimate/maintainability/okp4/cosmos-faucet?style=for-the-badge)](https://codeclimate.com/github/okp4/cosmos-faucet/maintainability)
+[![coverage](https://img.shields.io/codecov/c/github/okp4/cosmos-faucet?style=for-the-badge&token=0VQHJDMY5B&logo=codecov)](https://codecov.io/gh/okp4/cosmos-faucet)
+[![conventional commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=for-the-badge&logo=conventionalcommits)](https://conventionalcommits.org)
+[![contributor covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=for-the-badge)](https://github.com/okp4/.github/blob/main/CODE_OF_CONDUCT.md)
+[![license](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg?style=for-the-badge)](https://opensource.org/licenses/BSD-3-Clause)
 
 This faucet app allows anyone to request tokens for a [Cosmos](https://cosmos.network/) account address, either in command line or in service mode, with optional [ReCaptcha](https://www.google.com/recaptcha/about/) security.
 
