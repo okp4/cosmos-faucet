@@ -1,9 +1,9 @@
 # CØSMOS Faucet
 
 [![version](https://img.shields.io/github/v/release/okp4/cosmos-faucet?style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/releases)
-[![lint](https://img.shields.io/github/workflow/status/okp4/cosmos-faucet/Lint?label=lint&style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/actions/workflows/lint.yml)
-[![build](https://img.shields.io/github/workflow/status/okp4/cosmos-faucet/Build?label=build&style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/actions/workflows/build.yml)
-[![test](https://img.shields.io/github/workflow/status/okp4/cosmos-faucet/Test?label=test&style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/actions/workflows/test.yml)
+[![lint](https://img.shields.io/github/actions/workflow/status/okp4/cosmos-faucet/lint.yml?branch=main&label=lint&style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/actions/workflows/lint.yml)
+[![build](https://img.shields.io/github/actions/workflow/status/okp4/cosmos-faucet/build.yml?branch=main&label=build&style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/actions/workflows/build.yml)
+[![test](https://img.shields.io/github/actions/workflow/status/okp4/cosmos-faucet/test.yml?branch=main&label=test&style=for-the-badge&logo=github)](https://github.com/okp4/cosmos-faucet/actions/workflows/test.yml)
 [![maintainability](https://img.shields.io/codeclimate/maintainability/okp4/cosmos-faucet?style=for-the-badge)](https://codeclimate.com/github/okp4/cosmos-faucet/maintainability)
 [![coverage](https://img.shields.io/codecov/c/github/okp4/cosmos-faucet?style=for-the-badge&token=0VQHJDMY5B&logo=codecov)](https://codecov.io/gh/okp4/cosmos-faucet)
 [![conventional commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=for-the-badge&logo=conventionalcommits)](https://conventionalcommits.org)
