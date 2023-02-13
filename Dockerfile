@@ -8,7 +8,7 @@ COPY . /src/
 RUN make build CGO_ENABLED=0
 
 #--- Image stage
-FROM alpine:3.17.1
+FROM alpine:3.17.2
 
 COPY --from=go-builder /src/target/dist/cosmos-faucet /usr/bin/cosmos-faucet
 
