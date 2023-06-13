@@ -1,5 +1,16 @@
 # CØSMOS Faucet
 
+## [2.0.0](https://github.com/okp4/cosmos-faucet/compare/v1.1.0...v2.0.0) (2023-06-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cosmos:** bump cosmos sdk version to 0.46.13
+
+### Features
+
+* **cosmos:** bump cosmos sdk version to 0.46.13 ([911a649](https://github.com/okp4/cosmos-faucet/commit/911a64934641ee05e346efaf76afad8095c8a793))
+
 # [1.1.0](https://github.com/okp4/cosmos-faucet/compare/v1.0.0...v1.1.0) (2022-08-30)
 
 
