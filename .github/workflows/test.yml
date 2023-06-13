@@ -35,5 +35,5 @@ jobs:
         with:
           files: ./target/coverage.txt
           env_vars: OS,GOLANG
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           verbose: true
