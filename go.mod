@@ -3,7 +3,7 @@ module okp4/cosmos-faucet
 go 1.18
 
 require (
-	github.com/99designs/gqlgen v0.17.31
+	github.com/99designs/gqlgen v0.17.35
 	github.com/asynkron/protoactor-go v0.0.0-20220616142548-afd2d973a1d1
 	github.com/cosmos/cosmos-sdk v0.46.7
 	github.com/gorilla/mux v1.8.0
@@ -95,7 +95,7 @@ require (
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
-	github.com/hashicorp/golang-lru/v2 v2.0.1 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hdevalence/ed25519consensus v0.0.0-20220222234857-c00d1f31bab3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -108,7 +108,7 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mimoo/StrobeGo v0.0.0-20210601165009-122bf33a46e0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -142,7 +142,7 @@ require (
 	github.com/tendermint/tendermint v0.34.24 // indirect
 	github.com/tendermint/tm-db v0.6.7 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
-	github.com/urfave/cli/v2 v2.24.4 // indirect
+	github.com/urfave/cli/v2 v2.25.5 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/zondax/hid v0.9.1 // indirect
 	github.com/zondax/ledger-go v0.14.0 // indirect
@@ -157,13 +157,13 @@ require (
 	go.opentelemetry.io/otel/trace v1.11.0 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
-	golang.org/x/mod v0.9.0 // indirect
+	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
-	golang.org/x/tools v0.7.0 // indirect
+	golang.org/x/tools v0.9.3 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.122.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
