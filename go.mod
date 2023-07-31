@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/prometheus/client_golang v1.16.0
-	github.com/rs/zerolog v1.29.1
+	github.com/rs/zerolog v1.30.0
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
