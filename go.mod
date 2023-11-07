@@ -6,7 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.31
 	github.com/asynkron/protoactor-go v0.0.0-20220616142548-afd2d973a1d1
 	github.com/cosmos/cosmos-sdk v0.46.7
-	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/rs/zerolog v1.31.0
